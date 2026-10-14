@@ -1,0 +1,6 @@
+{
+  "kits": {
+    "coder": { "prompt": "./kit/coder.md" },
+    "reviewer": { "prompt": "./kit/reviewer.md" }
+  }
+}

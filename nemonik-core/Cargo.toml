@@ -1,0 +1,26 @@
+[package]
+name = "nemonik-core"
+version.workspace = true
+edition.workspace = true
+description = "Core library for the nemonik CLI: kit resolution, the trust gate, and agent launch."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+flate2.workspace = true
+http.workspace = true
+keyring.workspace = true
+rmcp.workspace = true
+oauth2.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tar.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

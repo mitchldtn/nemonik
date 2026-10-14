@@ -1,0 +1,5 @@
+/target
+.DS_Store
+.idea
+# Local Claude Code settings; never part of the source tree.
+.claude/

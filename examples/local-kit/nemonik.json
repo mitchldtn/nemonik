@@ -1,0 +1,11 @@
+{
+  "kits": {
+    "local-kit": {
+      "prompt": "./prompt.md",
+      "skills": "./skills",
+      "hooks": "./hooks.json",
+      "workflow": "./workflow.md",
+      "workflow_inject": "user"
+    }
+  }
+}

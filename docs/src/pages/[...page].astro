@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import { splitArticle } from "../lib/article";
+import { HOME, pageHref, sortPages } from "../lib/site";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("pages");
+  const pages = sortPages(entries.map((e) => ({ id: e.id, ...e.data, entry: e })));
+  return pages.map((page, i) => ({
+    params: { page: page.id === HOME ? undefined : page.id },
+    props: { page, prev: pages[i - 1], next: pages[i + 1] },
+  }));
+}
+
+const { page, prev, next } = Astro.props;
+const { body, notes } = splitArticle(page.entry.rendered?.html ?? "");
+const headings = (page.entry.rendered?.metadata?.headings ?? []).filter((h) => h.depth === 2);
+---
+
+<Layout title={page.title} description={page.description} current={page.id} group={page.group}>
+  <main>
+    <article id="content" data-pagefind-body data-pagefind-meta={`group:${page.group}`}>
+      <div class="crumb" data-pagefind-ignore>{page.group} / <b>{page.title}</b></div>
+      <h1>{page.title}</h1>
+      <Fragment set:html={body} />
+      <div class="pair" data-pagefind-ignore>
+        {
+          prev ? (
+            <a href={pageHref(prev.id)}>
+              <span>Previous</span>
+              <strong>{prev.title}</strong>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+        {
+          next && (
+            <a href={pageHref(next.id)}>
+              <span>Next</span>
+              <strong>{next.title}</strong>
+            </a>
+          )
+        }
+      </div>
+    </article>
+  </main>
+  <aside class="rail">
+    <div class="t">On this page</div>
+    <div class="toc" id="toc">
+      {headings.map((h) => <a href={`#${h.slug}`} data-h={h.slug}>{h.text}</a>)}
+    </div>
+    {notes.length > 0 && <div class="notes" data-pagefind-body set:html={notes.join("")} />}
+  </aside>
+</Layout>

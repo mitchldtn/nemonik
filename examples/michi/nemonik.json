@@ -1,0 +1,15 @@
+{
+  "kits": {
+    "michi:paired": {
+      "prompt": "./kit/prompt.md",
+      "skills": "./kit/skills/paired",
+      "workflow": "./kit/workflow.md",
+      "workflow_inject": "both"
+    },
+    "michi:review": {
+      "prompt": "./kit/review-prompt.md",
+      "workflow": "./kit/review-workflow.md",
+      "workflow_inject": "user"
+    }
+  }
+}

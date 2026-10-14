@@ -1,0 +1,22 @@
+{
+  "kits": {
+    "sdd:plan": {
+      "prompt": "./kit/prompt.md",
+      "skills": ["./kit/skills/shared", "./kit/skills/plan"],
+      "workflow": "./kit/plan.md",
+      "workflow_inject": "user"
+    },
+    "sdd:build": {
+      "prompt": "./kit/prompt.md",
+      "skills": ["./kit/skills/shared", "./kit/skills/build"],
+      "workflow": "./kit/build.md",
+      "workflow_inject": "user"
+    },
+    "sdd:review": {
+      "prompt": "./kit/prompt.md",
+      "skills": ["./kit/skills/shared", "./kit/skills/review"],
+      "workflow": "./kit/review.md",
+      "workflow_inject": "user"
+    }
+  }
+}

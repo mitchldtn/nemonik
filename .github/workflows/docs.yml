@@ -1,0 +1,74 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    # Cargo.toml holds the version shown in the top bar.
+    paths: [docs/**, .github/workflows/docs.yml, Cargo.toml]
+  pull_request:
+    paths: [docs/**, .github/workflows/docs.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: docs/.nvmrc
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --offline --include-fragments --index-files index.html
+            --root-dir ${{ github.workspace }}/docs/dist
+            --remap '^https://docs\.nemonik\.io/(.*)$ file://${{ github.workspace }}/docs/dist/$1'
+            docs/dist
+      # Fork PRs get no secrets, so only same-repo PRs get a preview.
+      - name: Upload preview
+        id: preview
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: docs
+          command: versions upload --preview-alias pr-${{ github.event.number }}
+      # One comment per PR, edited on each push.
+      - name: Comment preview URL
+        if: steps.preview.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.number }}
+          OUTPUT: ${{ steps.preview.outputs.command-output }}
+          URL: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          alias=$(printf '%s\n' "$OUTPUT" | grep -o 'https://pr-[^ ]*' | head -1)
+          url=${alias:-$URL}
+          test -n "$url"
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --edit-last --create-if-none --body "Docs preview: $url"
+      - name: Deploy
+        if: github.event_name == 'push'
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: docs
+          command: deploy

@@ -1,0 +1,9 @@
+{
+  "kits": {
+    "openspec:workflow": {
+      "prompt": "./kit/prompt.md",
+      "workflow": "./kit/workflow.md",
+      "workflow_inject": "user"
+    }
+  }
+}

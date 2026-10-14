@@ -1,0 +1,399 @@
+---
+name: michi-planning
+description:
+  Prepare a project milestone for michi execution — write the plan, define acceptance criteria, set up
+  verification, and scope the work for autonomous agent implementation.
+---
+
+# Michi Planning
+
+Prepare a milestone for michi execution. This happens before the implementation session — either in a separate
+planning session or as the first phase of a combined session.
+
+**Principles served:** Shared context as foundation (explore before planning). Surface assumptions (explicit assumption
+identification). Verification governs autonomy (co-design scenarios that constrain what "done" means). See the
+Principles in your system prompt.
+
+**Multi-project repos:** If the repo has `multi-project: true` in CLAUDE.md, ask the user which project the plan
+is for (the umbrella = ROOT, or a named sub-project). Plans/specs/scenarios live under that project's epics:
+
+- **ROOT (umbrella):** `docs/ROOT/epics/<epic>/plans/`, `spec.md`, `verification/scenarios.md`.
+- **Sub-project:** `docs/<name>/epics/<epic>/plans/`, `spec.md`, `verification/scenarios.md`.
+
+## Trust the Human's Framing
+
+The framework — planning vs. session vs. workshop, scope, milestones, what counts as an epic — is for the human's
+use, and for the agent when the human hasn't decided. When the human *has* picked a skill and set scope, your job
+is to execute, not re-triage the choice.
+
+Surface concerns about specific decisions (an assumption that seems wrong, a verification gap, a missing
+prerequisite). Don't argue with the choice of skill, the size of scope, or whether something "should" be its own
+milestone or a separate epic. The human has context the agent doesn't.
+
+This is *Clarify before Asserting* applied to scope and skill choice — anticipating "the right way" to organize
+work is the *impulse to help* pull. Match the depth of your work to the depth of the ask.
+
+## Inputs
+
+Before starting:
+
+- The project's overall spec or feature plan (what are we building?)
+- The milestone scope (which slice of the work?)
+- Access to the codebase (to explore patterns, understand existing code)
+- Context reference package (optional, brownfield projects) — video recordings, HAR files, screenshots, workflow docs
+  from a prior context-capture session. These show how users interact with the application, not just how the code is
+  structured. When available, they produce better verification scenarios.
+
+## Assess Complexity and Uncertainty
+
+Before exploring or drafting, assess where this milestone sits on the Complexity and Uncertainty
+axis (see *Two Modes of Practice* in the Principles in your system prompt). The reading shapes exploration
+depth, assumption-surfacing rigor, and implementation pacing.
+
+**Complexity factors:** greenfield vs. brownfield vs. legacy, repo size, tightness of existing
+constraints, depth and rigidity of dependencies.
+
+**Uncertainty factors:** novel vs. commodity domain, requirements clarity (well-defined vs.
+discovered through the work), test coverage, prior agent exposure to this codebase, novel pattern
+or new territory (a named code pattern in the milestone description counts here).
+
+Combine into Low / Mixed / High. Record the reading and the reasoning at the top of the plan doc.
+
+- **Low C/U** — pacing is the user's choice. Light exploration, standard assumption surfacing.
+- **Mixed** (Low on one axis, High on the other) — be careful. The user may want Entrusted; confirm
+  and suggest a Paired example or a paired review of the first milestone before transitioning.
+- **High C/U** — start in Paired with Crawl/Walk. Deeper exploration. More rigorous assumption
+  surfacing. Entrusted is earned by demonstrating alignment over the first one or two milestones.
+
+If the reading is High or Mixed, flag it to the user and confirm pacing before proceeding.
+
+## First-Epic Guidance
+
+The first Michi epic on a project is different. The accumulated Michi context (journals, learnings, scenarios, architecture
+docs) that enriches later planning doesn't exist yet. **First epic is implicitly High Complexity/Uncertainty**, so the
+prescription below follows from the *Assess Complexity and Uncertainty* section above.
+
+**Spec maturity:** The starting spec is a hypothesis, not a contract. It may reference tools that don't exist, make
+assumptions about APIs that haven't been validated, or describe a scope that shifts once implementation begins. Treat it
+accordingly:
+
+- Validate all referenced dependencies, tools, and packages exist (e.g., `npm view <package>`)
+- Surface assumptions about external formats and behaviors — don't assume the spec author verified them
+- When the spec is wrong on facts, correct and log the deviation. Don't wait for permission to fix factual errors.
+
+**Mode:** Paired mode is the default for first epics. The human and agent are building shared context about both the
+project and the Michi process. Start with small steps and short turns. Earn speed as the session progresses — don't try to
+instantly accelerate.
+
+**Subsequent epics** benefit from accumulated context: prior journals, learnings, scenario catalogs, architecture docs.
+The spec is better because the foundation is richer. This is the spiral at work.
+
+## Non-Code Milestones
+
+When the deliverable is not code (research, roadmap, design review, backlog generation):
+
+- **Focus on deliverables and exit criteria.** Name every artifact the milestone produces ("a prioritized roadmap," "a
+  harvest inventory," "a comparison with recommendation"). If you can't name the deliverables, the scope isn't clear
+  enough.
+- **Exit criteria replace verification scenarios.** Define how you'll know each deliverable is done — specific enough to
+  assess pass/fail.
+- **Exploration depth is bounded by the deliverable.** Read enough to form a best-guess plan, not everything. The goal
+  is producing the named artifacts, not comprehensive understanding.
+- **Do not use superpowers skills** (brainstorming, writing-plans, executing-plans) for non-code milestones. They assume
+  code deliverables. Use Michi skills with the non-code target reference.
+
+The rest of this process still applies — surface assumptions, ask clarifying questions, write the plan doc. The plan
+template works for non-code; the `## Verification` section uses exit criteria instead of scenarios.
+
+## Process
+
+### 1. Explore the Relevant Codebase
+
+Before writing anything, understand what exists. Verification quality is bounded by shared context — the better you
+understand how the application works, the better the scenarios.
+
+- Launch Explore subagent(s) to analyze the areas of code this milestone touches
+- Map existing patterns: route patterns, test patterns, repository patterns, naming conventions
+- Identify files that will serve as templates for new code
+- If context capture artifacts exist (HAR files, workflow docs, screenshots), read them alongside the codebase — they
+  show application behavior from the user's perspective
+- **Verify you're on the correct branch** (`git branch`) before exploring any repo
+
+Capture your findings — they inform every subsequent step.
+
+### 2. Surface Assumptions and Ask Clarifying Questions
+
+Before asking questions, explicitly identify what's being assumed. Unstated assumptions are the most common source of
+escaped bugs — not coding errors, things nobody challenged.
+
+**Surface assumptions about:**
+
+- The system: what existing behavior are we relying on? What schemas, enums, or contracts must hold?
+- The user: who is using this, and what do they expect? Single caller? Specific auth flow? Particular data shape?
+- Integration boundaries: what services, packages, or systems does this touch? What are we assuming about their
+  behavior?
+
+List assumptions explicitly. Challenge each: is this actually true? Could it change? What breaks if it doesn't hold?
+
+**Then ask clarifying questions about:**
+
+- Design decisions affecting the public API or data model
+- Integration points with other packages or services
+- Anything where two reasonable approaches exist and the choice matters
+- Assumptions you can't verify from the codebase
+
+Keep questions focused. Don't ask about implementation details you can decide yourself — ask about _contracts_,
+_constraints_, and _assumptions_.
+
+**Watch for scope assumptions especially.** "They probably also want X" or "this should include Y" is the
+*impulse to help* pull (see *Clarify before Asserting* in the Principles in your system prompt). Match the depth of the
+plan to the ask; surface proposed scope expansion as a question, not a conclusion.
+
+**Ask one at a time, self-contained.** Present questions at the end of the turn, each with the 2–4 sentences of
+context needed to answer it without scrolling back — no bare section numbers or internal IDs. Batch only questions
+that are genuinely one decision. (See *Addressing the Human* in the Ground Rules in your system prompt.)
+
+### 3. Co-Design Verification Scenarios
+
+Spec and verification are co-designed — defining "how will we verify this?" shapes the spec itself. Scenarios aren't
+afterthoughts; they're design tools that surface gaps, ambiguities, and integration concerns.
+
+**Start with existing verification artifacts.** Before writing new scenarios, review the project's scenario catalog and
+verification docs from previous milestones:
+
+- Which existing scenarios are relevant to this milestone? These become regression checks.
+- Which might break due to this milestone's changes? Flag for review.
+- What new scenarios are needed for the new functionality?
+
+**Plan when to test.** Not all verification has the same cost. Decide during planning:
+
+- Which scenarios run during the implementation cycle (fast feedback, like TDD)?
+- Which run as post-milestone verification (comprehensive, slower)?
+- Final verification should be comprehensive — all relevant scenarios, not just the new ones.
+
+Work with the human to write 3-5 **new** scenarios for this milestone:
+
+- Each scenario is a **story about a user getting a benefit** — not a feature checklist. "A user syncs their Claude Code
+  chats and finds them searchable" rather than "POST /api/chat returns 200."
+- Use Kaner's scenario testing criteria: motivating, credible, complex (multiple features/components), easy to evaluate.
+- **Decompose each scenario into Given-When-Then steps.** The bridge from story to executable verification.
+- **Categorize by verification level:**
+  - **Level A:** Agent executes autonomously — API calls, data store queries, concrete assertions with binary pass/fail
+  - **Level B:** Agent executes, but evaluation requires judgment — output quality, error message clarity
+  - **Level C:** Human evaluates — UX feel, visual design, workflow naturalness
+
+Level A scenarios become mandatory post-milestone verification steps. Level B/C are noted for debrief review.
+
+If a scenario can't be made executable (Level A), that's a signal to rethink the design or scope — not to skip
+verification.
+
+### 4. Write the Milestone Plan
+
+Create `docs/epics/<epic-name>/plans/<ticket>-plan.md` using the plan template under **Plan template** at the end of this skill. Key
+sections:
+
+- **Context** — why this milestone exists
+- **Scope** — what it delivers and what it explicitly does NOT include
+- **Acceptance Criteria** — explicit conditions for "done"
+- **Scenarios** — co-designed scenarios from step 3, with Given-When-Then (authored here, promoted to the epic's
+  `verification/scenarios.md` catalog during debrief)
+- **Steps** — numbered implementation steps with file paths
+- **Files** — new files to create, existing files to modify
+- **Decisions** — empty, agent fills during implementation
+- **Notes** — empty, agent fills during implementation
+- **Discussion** — empty, agent fills during implementation with items for human review
+- **Verification** — Level A scenarios (mandatory), unit/integration tests, cross-package checks, scope check, Level B/C
+  scenarios (debrief)
+
+### Epic-Level Verification Artifacts
+
+Create or update these during planning — not during debrief:
+
+- **`verification/test-plan.md`** — auth strategy, environment prerequisites, tooling decisions, test organization,
+  fixture strategy. The "how we verify" infrastructure doc.
+- **`verification/scenarios.md`** — the scenario catalog. Seed with the first
+  milestone's scenarios. Future milestones add; debriefs curate.
+
+These inform implementation. Deferring them to debrief means the first milestone runs without explicit verification
+infrastructure decisions.
+
+### 5. Review Against Existing Verification Scenarios
+
+If the epic has a scenario catalog (`docs/epics/<epic>/verification/scenarios.md`):
+
+- Check that acceptance criteria align with verification scenarios
+- Identify scenarios needing updates for this milestone
+- Flag gaps — scenarios that should exist but don't
+
+### 6. Assess Cross-Package Impact
+
+This is where Round 1 bugs came from. Explicitly check:
+
+- Does this milestone introduce new types, enum values, or service names?
+- Does it add a new caller to an existing pipeline?
+- Are there downstream schemas (Zod, JSON Schema) that need updating?
+- Are there hardcoded assumptions about caller identity?
+
+If yes to any: add specific verification steps to the plan and flag as high-priority.
+
+### 7. Plan Self-Review
+
+Before presenting to the human, review with fresh eyes:
+
+1. **Placeholder scan:** Any "TBD", incomplete sections, vague acceptance criteria? Fix them.
+2. **Internal consistency:** Do scenarios match acceptance criteria? Do steps produce what scenarios verify?
+3. **Scope-verification alignment:** For each acceptance criterion, is there a verification step? For each scenario, a
+   step that implements the behavior?
+4. **Assumption audit:** Are assumptions from step 2 reflected in the plan? New assumptions introduced by implementation
+   steps?
+5. **Inputs-vs-outputs check:** Planning often reads substantial source material — spec, prior journals, scenario
+   catalog, referenced docs, codebase areas. Verify each significant source is reflected in the plan (scope, steps,
+   scenarios, or assumptions). A plan that feels thin after heavy reading has likely dropped material. Use the inputs
+   as a checklist.
+
+Fix issues inline. Don't re-review — fix and move on.
+
+### Not Ready is a Valid Outcome
+
+Planning can conclude "not ready to plan yet." Signals:
+
+- The spec references dependencies that haven't been validated, and validation would change the scope
+- Acceptance criteria can't be made specific without a decision the human hasn't made
+- Verification scenarios can't be decomposed into Given-When-Then because the behavior isn't well-defined
+- Cross-package impacts are too unknown to scope without a spike first
+
+When this happens, don't force a plan. Name what's missing, flag what would unblock it (an exploration session, a
+spike, a human decision), and stop. An honest "we need more investigation before planning makes sense" beats a plan
+built on unresolved ambiguity.
+
+### 8. Confirm Readiness
+
+Before handing off to implementation, verify:
+
+- [ ] Plan doc written with all sections
+- [ ] Acceptance criteria are specific and verifiable
+- [ ] Verification scenarios co-designed and decomposed into Given-When-Then
+- [ ] Level A scenarios are concrete enough for the agent to execute
+- [ ] Cross-package impacts identified
+- [ ] Branch exists for this work
+- [ ] Environment is ready (Docker, seed data, services)
+
+Present the plan to the human for review. The plan is a contract — implementation executes against it.
+
+### Update STATUS.md (and journal)
+
+If planning produced a new plan doc, shifted what's "next," or added/changed an active milestone, update STATUS.md
+before closing out — and the active epic's `journal.md` if you wrote to it.
+
+**Read STATUS.md cold** — re-open the file and read each line against current reality, not against your in-context
+recollection. Edit anything stale. Update the `**Last updated:** YYYY-MM-DD` stamp at the top.
+
+Not "if anything significant changed" — the reflex is read-cold-and-update. See the Ground Rules in your system prompt for the
+freshness contract on root docs.
+
+### What's Next
+
+When the plan is approved, the natural next step is `/michi-session` to execute it.
+
+## Plan template
+
+```markdown
+# M[N]: [Title]
+
+## Context
+
+[Why this milestone exists — the problem or need it addresses, what prompted it]
+
+## Scope
+
+[What this milestone delivers]
+
+**Out of scope:** [What it explicitly does NOT include]
+
+## Acceptance Criteria
+
+[Explicit conditions for "done" — verified, not just asserted]
+
+- [ ] [Specific verifiable outcome]
+- [ ] [Specific verifiable outcome]
+- [ ] Real API call with real data succeeds (not dry-run)
+- [ ] Result verified in data store
+- [ ] Cross-package schemas updated (if new types/enums introduced)
+- [ ] Committed on milestone branch
+
+## Scenarios
+
+[Co-designed during planning. Each scenario is a story about a user accomplishing something. Scenarios shape the spec —
+writing them surfaces gaps, ambiguities, and integration concerns.]
+
+### Scenario: [Name]
+
+**Story:** [2-3 sentences — who is doing what, why it matters, what benefit they expect] **Level:** A / B / C
+**Given-When-Then:**
+
+    Given [precondition]
+    When [action]
+    Then [expected outcome]
+
+[Repeat for each scenario. Aim for 3-5 per milestone.]
+
+## Steps
+
+[Numbered implementation steps]
+
+1. [Step with file paths]
+2. [Step with file paths]
+
+## Files
+
+| File              | Action          | Purpose        |
+| ----------------- | --------------- | -------------- |
+| `path/to/file.js` | Create / Modify | [What and why] |
+
+## Decisions
+
+[Empty — agent fills during implementation]
+
+[Format for each decision:]
+
+    ### [Short title]
+    - **Decision:** [What you chose]
+    - **Alternatives:** [What else you considered]
+    - **Reasoning:** [Why this choice]
+    - **Impact:** implementation-detail | design-choice | contract-change
+    - **Reversible:** Yes / No
+
+## Notes
+
+[Empty — agent fills during implementation with gotchas, surprises, things to remember]
+
+## Verification
+
+### During Implementation (fast feedback)
+
+[Scenarios and tests to run during the implementation cycle — fast, cheap, guiding development like TDD]
+
+- [ ] Unit tests pass after each file change
+- [ ] [Fast Level A scenarios that validate core behavior as it's built]
+
+### Final Verification (comprehensive, post-milestone)
+
+[All mandatory before declaring done.]
+
+**New scenarios (this milestone):** [Given-When-Then steps from ## Scenarios above]
+
+**Regression scenarios (previous milestones):** [Existing scenarios from the project's verification catalog relevant to
+this milestone. List or reference the catalog.]
+
+**Standard checks:**
+
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Cross-package schemas updated (if new types/enums introduced)
+- [ ] No hardcoded caller assumptions introduced
+- [ ] Scope check — implementation stays within the plan's stated scope
+
+### Level B/C Scenarios (debrief/human review)
+
+[Scenarios requiring judgment — noted here, evaluated during debrief]
+```

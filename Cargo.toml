@@ -1,0 +1,63 @@
+[workspace]
+members = ["nemonik-core"]
+
+[workspace.package]
+version = "0.0.29"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mitchldtn/nemonik"
+homepage = "https://nemonik.io"
+
+[workspace.dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+clap = { version = "4.6.6", features = ["derive"] }
+crossterm = "0.29.0"
+flate2 = "1.1.10"
+futures = "0.3"
+http = "1.5.0"
+keyring = "4.1.6"
+rmcp = { version = "3.1.2", default-features = false, features = ["client", "auth", "transport-streamable-http-client", "transport-streamable-http-client-reqwest", "macros", "reqwest"] }
+# Keep in step with the version rmcp uses.
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
+# Keep in step with the version rmcp uses.
+oauth2 = { version = "5.0", default-features = false }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+sha2 = "0.11.0"
+similar = "3.1.1"
+tar = { version = "0.4.46", default-features = false }
+tempfile = "3.27.0"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "macros", "net", "io-util", "signal", "sync", "time"] }
+
+[package]
+name = "nemonik"
+version.workspace = true
+edition.workspace = true
+description = "Package how your team works into kits you share and refine: the system prompt, skills, MCP servers and hooks for planning, coding and reviewing. A running memory, journal and status carry each project forward across sessions. Claude or Codex, one command."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["claude", "codex", "ai", "agent", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+nemonik-core = { path = "nemonik-core" }
+anyhow.workspace = true
+clap.workspace = true
+crossterm.workspace = true
+futures.workspace = true
+reqwest.workspace = true
+rmcp.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+similar.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[profile.release]
+strip = true

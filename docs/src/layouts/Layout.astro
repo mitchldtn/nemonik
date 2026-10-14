@@ -1,0 +1,103 @@
+---
+import { getCollection } from "astro:content";
+import "../styles/site.css";
+import {
+  GITHUB,
+  TAB_LABEL,
+  grouped,
+  pageHref,
+  readCliVersion,
+  sortPages,
+  type Group,
+} from "../lib/site";
+
+interface Props {
+  title: string;
+  description?: string;
+  current?: string;
+  group?: Group;
+}
+
+const { title, description, current, group } = Astro.props;
+const pages = sortPages((await getCollection("pages")).map((e) => ({ id: e.id, ...e.data })));
+const groups = grouped(pages);
+const version = readCliVersion();
+const searchPages = pages.map((p) => ({ t: p.title, g: p.group, href: pageHref(p.id) }));
+// The 404 page is served at any path, so it has no canonical URL.
+const canonical = current ? new URL(pageHref(current), Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title === "nemonik docs" ? title : `${title} · nemonik docs`}</title>
+    {description && <meta name="description" content={description} />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <script is:inline>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem("nk-docs-theme"); } catch (_) {}
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        if (t === "dark") document.documentElement.classList.add("dark");
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="top">
+      <button class="btn menu" id="menu" type="button">menu</button>
+      <a class="mark" href="/">nemonik <em>docs</em></a>
+      <nav class="topnav">
+        {
+          groups.map((g) => (
+            <a href={pageHref(g.pages[0].id)} class={g.group === group ? "on" : undefined}>
+              {TAB_LABEL[g.group]}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="search" id="open-k">
+        <span>Search the docs</span><kbd>⌘K</kbd>
+      </div>
+      <div class="toplinks">
+        <a href={GITHUB}>GitHub</a><span>v{version}</span><button class="btn" id="theme" type="button">dark</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="side" id="side">
+        {
+          groups.map((g) => (
+            <>
+              <div class="g">{g.group}</div>
+              {g.pages.map((p) => (
+                <a href={pageHref(p.id)} class={p.id === current ? "on" : undefined}>
+                  {p.title}
+                </a>
+              ))}
+            </>
+          ))
+        }
+      </nav>
+      <slot />
+    </div>
+
+    <div class="k-overlay" id="k">
+      <div class="k-box">
+        <input id="k-in" placeholder="Search pages and sections" autocomplete="off" />
+        <div class="k-res" id="k-res"></div>
+        <div class="k-foot">↑ ↓ to move · enter to open · esc to close</div>
+      </div>
+    </div>
+
+    <script is:inline type="application/json" id="k-pages" set:html={JSON.stringify(searchPages).replace(/</g, "\\u003c")} />
+    <script is:inline src="/site.js"></script>
+  </body>
+</html>
