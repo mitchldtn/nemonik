@@ -25,6 +25,10 @@ the full verification below has run in this session.
 
 ## 2. Build, task by task
 
+Ticks are written per group, so the first group with an unticked task may be partly done. Before
+starting it, run each of its unticked tasks' `Verify:`; tick the ones that pass in one `edits` put
+and continue from the first one that fails.
+
 For each unchecked task in `<id>-tasks`:
 
 1. Write the failing test first and run it to see it fail.
@@ -32,21 +36,22 @@ For each unchecked task in `<id>-tasks`:
 3. Run the whole test suite after every file you change, not just at the end. Fix any other test
    you broke before moving on.
 4. Refactor only on green.
-5. When the last task of a group is done, tick the group's tasks (`- [ ]` to `- [x]`) in one
-   `mode="edit"` put with an `edits` list. On resume, re-check the unticked tasks of a group you
-   were in.
+5. When the last task of a group (a `## N.` heading in `<id>-tasks`) is done, tick the group's tasks
+   (`- [ ]` to `- [x]`) in one `mode="edit"` put with an `edits` list, with the group's decisions in
+   the same write.
 
 Skip test-first only if the human says so.
 
 ## 3. Log decisions as you go
 
 Any choice you make without the human goes in `<id>-design`'s `## Decisions` (or a `## Decisions`
-section at the end of `<id>-tasks` when there is no design), in the format from `sdd-artifacts`:
+section at the end of `<id>-tasks` when there is no design), in the format from `sdd-artifacts`,
+written with the group's tick:
 
 - `implementation-detail`: log it.
 - `design-choice`: log it; the human sees it at debrief.
-- `contract-change` (a public interface, a file format, a schema): log it and tell the human now.
-  If unsure, treat it as a contract change.
+- `contract-change` (a public interface, a file format, a schema): log it right away and tell the
+  human now. If unsure, treat it as a contract change.
 
 Things you can't decide alone but that don't block you go in `## Discussion`.
 
@@ -58,7 +63,8 @@ it as a decision. If the delta or verification need to change, edit them and say
 1. **Self-review:** read the full diff (`git diff` plus new files) against each acceptance criterion.
    Look for hardcoded values, missed callers, leftover debug code, unused imports.
 2. **Scenarios:** run every Level A scenario in `<id>-verification` literally, step by step. Write
-   pass or fail and the evidence under `## Results`, all scenarios of the round in one put.
+   pass or fail and the evidence under `## Results`, all scenarios of the round in one put (an
+   `edits` put, or a full `put` right after a `get`, as in `sdd-artifacts`).
 3. **Tests:** the full suite passes.
 4. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
    validates it is updated.
@@ -75,8 +81,8 @@ Only after the review is APPROVED, or skipped for tier S with the human's agreem
 1. Apply the delta to the `spec-<capability>` documents as described in `sdd-artifacts`.
 2. Run the structure check on the specs you changed.
 3. Set the proposal's State to `archived`.
-4. Update `status` in one `mode="edit"` put: move this change's line from In progress to Waiting on
-   the human (reviewed and folded, waiting for the commit), and update Deployed if it changed. Nothing
-   else. Leave `sdd-journal` and `memory` to debrief.
+4. Update `status` in one `mode="edit"` put with an `edits` list: move this change's line from In
+   progress to Waiting on the human (reviewed and folded, waiting for the commit), and update
+   Deployed if it changed. Nothing else. Leave `sdd-journal` and `memory` to debrief.
 5. Tell the human, in a few lines: what was built, test and scenario results, the review outcome,
    any contract-change decision.
