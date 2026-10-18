@@ -11,7 +11,7 @@ Three MCP tools: `put` writes, `get` reads one doc, `search` finds many.
 
 `put` replaces the whole body by default; `mode="append"` adds a section instead. Pass the same `slug` to update a doc in place.
 
-`mode="edit"` changes one passage of an existing doc: `old_str` must match exactly once, byte for byte, and is replaced with `new_str`; the rest of the doc stays as it is. The edit is refused, and nothing changes, when `old_str` is missing, empty or appears more than once.
+`mode="edit"` changes one passage of an existing doc: `old_str` must match exactly once, byte for byte, and is replaced with `new_str`; the rest of the doc stays as it is. The edit is refused, and nothing changes, when `old_str` is missing, empty or appears more than once, when no doc has that `slug`, or when `body` is passed too.
 
 ```mcp title="MCP"
 put(project="my-app", slug="architecture", body="...")
