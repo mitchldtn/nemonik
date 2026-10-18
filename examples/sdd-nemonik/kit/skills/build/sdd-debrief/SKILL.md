@@ -20,7 +20,8 @@ Scale it: a tier S change gets a short journal entry and passes 2 and 3; tiers M
 - **Bugs:** for each bug found during build or review: how was it found, why did it happen, and which
   scenario would have caught it earlier. Add that scenario to the relevant living spec as a
   `#### Scenario:` if it describes lasting behavior.
-- **Learnings:** product or codebase gotchas go in the journal; how-we-work lessons go in memory.
+- **Learnings:** note product or codebase gotchas for the journal and how-we-work lessons for
+  memory; they go in with pass 3's journal entry and its put to `memory`.
 
 ## Pass 2: Invalidate
 
@@ -30,17 +31,21 @@ What did this change make untrue?
   the code. Each requirement still holds? Fix the spec if it drifted, or report a code bug.
 - **Other docs:** README, docs, comments in the repository that describe the old behavior. List them
   for the human.
-- **Memory:** entries in `memory` about files, commands or habits that no longer exist. Remove or
-  correct them in place with `mode="edit"`.
-- **Runbook:** recipes in `runbook` this change made wrong. Correct them in place.
+- **Memory:** entries in `memory` about files, commands or habits that no longer exist. Note the
+  removals and corrections; they go in with pass 3's put to `memory`.
+- **Runbook:** recipes in `runbook` this change made wrong. Note the corrections; they go in with
+  pass 3's put to `runbook`.
 
 ## Pass 3: Currency
 
-- **Status:** read `status` as if new to the project, and change it line by line with
-  `mode="edit"`. Move this change to one Recently shipped line linking `<id>-debrief` (or keep it in
-  Waiting on the human if it isn't committed yet). Correct every line that is no longer true, drop
-  Recently shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and
-  in its six sections; a recipe found there moves to `runbook`.
+Write `status`, `runbook` and `memory` with one put each: a `mode="edit"` put with every change to
+that document (passes 1 and 2 included) in its `edits` list, or one full `put` right after a `get`.
+
+- **Status:** read `status` as if new to the project, and change it in place. Move this change to one
+  Recently shipped line linking `<id>-debrief` (or keep it in Waiting on the human if it isn't
+  committed yet). Correct every line that is no longer true, drop Recently shipped lines older than
+  two weeks, update `**Last updated:**`. Keep it under 100 lines and in its six sections; a recipe
+  found there moves to `runbook`.
 - **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section.
 - **Memory:** a new how-we-work lesson is merged into its topic section of `memory`.
 - **Journal:** append `### YYYY-MM-DD: <id>` to `sdd-journal` with what happened and what was learned.

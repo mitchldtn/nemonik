@@ -88,7 +88,7 @@ standards.
 | `<id>-holdouts` | scenarios only the reviewer reads |
 | `<id>-tasks` | checkboxes, each with how to verify it |
 | `<id>-review`, `<id>-debrief` | review rounds; the debrief |
-| `status` | current state, under 100 lines, edited line by line |
+| `status` | current state, under 100 lines, edited in place |
 | `runbook` | how to do recurring operational work |
 | `sdd-journal`, `memory` | what happened, how we work |
 
