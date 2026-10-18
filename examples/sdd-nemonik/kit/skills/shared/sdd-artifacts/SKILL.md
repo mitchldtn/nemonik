@@ -16,8 +16,12 @@ Every call takes `project=<key>`, the `project` field of `nemonik.json`.
 - **List the specs:** `search(project=<key>, type="spec", since="2000-01-01T00:00:00Z", limit=100)`.
 - **Change part of a document:** `put(project=<key>, slug="<slug>", mode="edit",
   old_str="<exact current text>", new_str="<new text>")`. `old_str` must appear exactly once; include
-  enough of the line to make it unique. Use this for every line change: ticking a task, a state, a
-  status line, a memory entry.
+  enough of the line to make it unique. Use this for a single change: a State line, the Base line.
+- **Change several parts at once:** `put(project=<key>, slug="<slug>", mode="edit",
+  edits=[{"old_str": "...", "new_str": "..."}, ...])`. The edits apply in order, each to the text the
+  earlier ones left; if one is refused, none land and the error names its index. Write each document
+  once per milestone: one `edits` put for all its changes (ticks, results, status lines), or one full
+  `put` right after a `get`.
 - **Write or replace a document:** `put(project=<key>, slug="<slug>", title="<title>",
   type="<type>", ticket="<id>", body="<full text>")`. A `put` without `mode` replaces the whole body:
   use it only for a new document or a restructure, and `get` the document right before so you don't
@@ -278,7 +282,8 @@ changed, and the final verdict.
 
 ## Memory
 
-Change these documents line by line with `mode="edit"` (the call is under Reading and writing).
+Change these documents in place with one `mode="edit"` put per document, all its changes in one
+`edits` list (the call is under Reading and writing).
 
 - `status`: what is true now, read at the start of every session. Under 100 lines.
 

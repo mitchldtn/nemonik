@@ -30,15 +30,19 @@ What did this change make untrue?
   the code. Each requirement still holds? Fix the spec if it drifted, or report a code bug.
 - **Other docs:** README, docs, comments in the repository that describe the old behavior. List them
   for the human.
-- **Memory:** entries in `memory` about files, commands or habits that no longer exist. Remove or
-  correct them in place with `mode="edit"`.
-- **Runbook:** recipes in `runbook` this change made wrong. Correct them in place.
+- **Memory:** entries in `memory` about files, commands or habits that no longer exist. Note the
+  removals and corrections; they go in with pass 3's put to `memory`.
+- **Runbook:** recipes in `runbook` this change made wrong. Note the corrections; they go in with
+  pass 3's put to `runbook`.
 
 ## Pass 3: Currency
 
-- **Status:** read `status` as if new to the project, and change it line by line with
-  `mode="edit"`. Move this change to one Recently shipped line linking `<id>-debrief` (or keep it in
-  Waiting on the human if it isn't committed yet). Correct every line that is no longer true, drop
+Write `status`, `runbook` and `memory` with one put each: a `mode="edit"` put with every change to
+that document (pass 2's included) in its `edits` list, or one full `put` right after a `get`.
+
+- **Status:** read `status` as if new to the project, and change it in place. Move this change to one
+  Recently shipped line linking `<id>-debrief` (or keep it in Waiting on the human if it isn't
+  committed yet). Correct every line that is no longer true, drop
   Recently shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and
   in its six sections; a recipe found there moves to `runbook`.
 - **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section.
