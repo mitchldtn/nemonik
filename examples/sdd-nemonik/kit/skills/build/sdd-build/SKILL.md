@@ -37,21 +37,19 @@ For each unchecked task in `<id>-tasks`:
    you broke before moving on.
 4. Refactor only on green.
 5. When the last task of a group (a `## N.` heading in `<id>-tasks`) is done, tick the group's tasks
-   (`- [ ]` to `- [x]`) in one `mode="edit"` put with an `edits` list, with the group's decisions in
-   the same write.
+   (`- [ ]` to `- [x]`) in one `mode="edit"` put with an `edits` list.
 
 Skip test-first only if the human says so.
 
 ## 3. Log decisions as you go
 
 Any choice you make without the human goes in `<id>-design`'s `## Decisions` (or a `## Decisions`
-section at the end of `<id>-tasks` when there is no design), in the format from `sdd-artifacts`,
-written with the group's tick:
+section at the end of `<id>-tasks` when there is no design), in the format from `sdd-artifacts`:
 
 - `implementation-detail`: log it.
 - `design-choice`: log it; the human sees it at debrief.
-- `contract-change` (a public interface, a file format, a schema): log it right away and tell the
-  human now. If unsure, treat it as a contract change.
+- `contract-change` (a public interface, a file format, a schema): log it and tell the human now.
+  If unsure, treat it as a contract change.
 
 Things you can't decide alone but that don't block you go in `## Discussion`.
 
