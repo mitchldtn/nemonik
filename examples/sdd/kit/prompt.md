@@ -15,7 +15,8 @@ Everything lives in the project's `sdd/` folder (see the `sdd-artifacts` skill):
 - `sdd/specs/<capability>/spec.md`: how the system behaves now.
 - `sdd/changes/<id>/`: one folder per change in progress.
 - `sdd/changes/archive/`: finished changes.
-- `sdd/memory/`: `status.md` (current state), `journal.md` (what happened), `memory.md` (how we work).
+- `sdd/memory/`: `status.md` (current state), `runbook.md` (how to do recurring operational work),
+  `journal.md` (what happened), `memory.md` (how we work).
 
 ## Persona
 

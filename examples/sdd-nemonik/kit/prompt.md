@@ -18,7 +18,8 @@ key. The repository holds only the code. The documents (see the `sdd-artifacts` 
 - `spec-<capability>`: how the system behaves now.
 - `<id>-proposal`, `<id>-delta`, `<id>-design`, `<id>-verification`, `<id>-holdouts`, `<id>-tasks`,
   `<id>-review`, `<id>-debrief`: one change.
-- `status` (current state), `sdd-journal` (what happened), `memory` (how we work).
+- `status` (current state), `runbook` (how to do recurring operational work), `sdd-journal` (what
+  happened), `memory` (how we work).
 
 ## Persona
 

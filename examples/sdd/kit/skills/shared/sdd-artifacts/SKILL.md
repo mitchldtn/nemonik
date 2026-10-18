@@ -24,6 +24,7 @@ sdd/
 ├── changes/archive/YYYY-MM-DD-<id>/    finished changes, same files
 └── memory/
     ├── status.md
+    ├── runbook.md
     ├── journal.md
     └── memory.md
 ```
@@ -268,11 +269,32 @@ changed, and the final verdict.
 
 ## Memory: `sdd/memory/`
 
-- `status.md`: `**Last updated:** YYYY-MM-DD` at the top, then what is in progress, what shipped
-  recently, what is next. Rewritten to stay true; old lines removed, not piled up.
+Change these files line by line; don't rewrite a whole file to change one line.
+
+- `status.md`: what is true now, read at the start of every session. Under 100 lines.
+
+  ```markdown
+  # Status
+
+  **Last updated:** YYYY-MM-DD
+
+  ## In progress
+  ## Waiting on the human
+  ## Next
+  ## Deployed
+  ## Recently shipped
+  ## Open follow-ups
+  ```
+
+  Exactly these sections, one line per item, linking the file that holds the detail. No history
+  (that is the journal and the archived changes), no recipes (`runbook.md`), no rules
+  (`project.md`, `memory.md`). Drop a Recently shipped line two weeks after its release.
+- `runbook.md`: how to do recurring operational work (deploys, releases, test setups, access) and the
+  environment facts it needs. One `##` section per area; read only the section you need.
 - `journal.md`: append only. `### YYYY-MM-DD: <id>` per entry: what happened, what was learned.
-- `memory.md`: how we work together: corrections from the human, confirmed approaches, gotchas.
-  Remove entries that stop being true.
+- `memory.md`: how we work together: corrections from the human, confirmed approaches, gotchas. One
+  `##` section per topic; merge a new entry into its topic, never add a dated section. Remove
+  entries that stop being true.
 
 ## Applying a delta (build, after review approves)
 

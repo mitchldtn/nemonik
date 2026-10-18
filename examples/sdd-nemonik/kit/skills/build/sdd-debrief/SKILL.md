@@ -31,12 +31,18 @@ What did this change make untrue?
 - **Other docs:** README, docs, comments in the repository that describe the old behavior. List them
   for the human.
 - **Memory:** entries in `memory` about files, commands or habits that no longer exist. Remove or
-  correct them.
+  correct them in place with `mode="edit"`.
+- **Runbook:** recipes in `runbook` this change made wrong. Correct them in place.
 
 ## Pass 3: Currency
 
-- **Status:** read `status` as if new to the project. Rewrite every line that is no longer true,
-  record where this change is now (built, committed, PR open or merged), update `**Last updated:**`.
+- **Status:** read `status` as if new to the project, and change it line by line with
+  `mode="edit"`. Move this change to one Recently shipped line linking `<id>-debrief` (or keep it in
+  Waiting on the human if it isn't committed yet). Correct every line that is no longer true, drop
+  Recently shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and
+  in its six sections; a recipe found there moves to `runbook`.
+- **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section.
+- **Memory:** a new how-we-work lesson is merged into its topic section of `memory`.
 - **Journal:** append `### YYYY-MM-DD: <id>` to `sdd-journal` with what happened and what was learned.
 - **Old documents:** mention archived changes or stale documents the human might want to retire.
   Don't delete anything.
@@ -52,6 +58,6 @@ Say whether the next change can move faster, the same, or slower, and why:
 ## Outputs
 
 - `<id>-debrief` (type `debrief`, ticket `<id>`): the three passes and the trust call.
-- `sdd-journal`, `status`, `memory` updated.
+- `sdd-journal`, `status`, `runbook`, `memory` updated.
 - Living spec fixes from pass 2.
 - End with the two or three findings that change what happens next.

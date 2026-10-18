@@ -17,9 +17,9 @@ the full verification below has run in this session.
 - `get` `project` and `memory`.
 - `git status` and `git branch`: note the branch. If there are unrelated uncommitted changes, ask
   before mixing work into them.
-- If `<id>-tasks` has no `**Base:**` line holding a commit (`git cat-file -e <sha>^{commit}`), set it
-  to `**Base:** <git rev-parse HEAD>` under the title and `put` it back. The reviewer diffs against
-  it.
+- If `<id>-tasks` has no `**Base:**` line holding a commit (`git cat-file -e <sha>^{commit}`), add
+  `**Base:** <git rev-parse HEAD>` under the title with a `mode="edit"` put. The reviewer diffs
+  against it.
 - Run the project's test suite once so you know its starting state.
 - Look for an existing library or pattern before writing commodity code (parsing, dates, files).
 
@@ -32,7 +32,7 @@ For each unchecked task in `<id>-tasks`:
 3. Run the whole test suite after every file you change, not just at the end. Fix any other test
    you broke before moving on.
 4. Refactor only on green.
-5. Tick the task (`- [x]`) and `put` the tasks document back.
+5. Tick the task (`- [ ]` to `- [x]`) with a `mode="edit"` put.
 
 Skip test-first only if the human says so.
 
@@ -56,7 +56,7 @@ it as a decision. If the delta or verification need to change, edit them and say
 1. **Self-review:** read the full diff (`git diff` plus new files) against each acceptance criterion.
    Look for hardcoded values, missed callers, leftover debug code, unused imports.
 2. **Scenarios:** run every Level A scenario in `<id>-verification` literally, step by step. Write
-   pass or fail and the evidence under `## Results` and `put` it back.
+   pass or fail and the evidence under `## Results` with a `mode="edit"` put.
 3. **Tests:** the full suite passes.
 4. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
    validates it is updated.
@@ -73,7 +73,8 @@ Only after the review is APPROVED, or skipped for tier S with the human's agreem
 1. Apply the delta to the `spec-<capability>` documents as described in `sdd-artifacts`.
 2. Run the structure check on the specs you changed.
 3. Set the proposal's State to `archived`.
-4. Update `status`: this change is built, reviewed and folded into the specs. Leave `sdd-journal`
-   and `memory` to debrief.
+4. Update `status` with `mode="edit"`: move this change's line from In progress to Waiting on the
+   human (reviewed and folded, waiting for the commit), and update Deployed if it changed. Nothing
+   else. Leave `sdd-journal` and `memory` to debrief.
 5. Tell the human, in a few lines: what was built, test and scenario results, the review outcome,
    any contract-change decision.

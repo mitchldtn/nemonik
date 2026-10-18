@@ -4,6 +4,12 @@
 
 ## In progress
 
-## Shipped recently
+## Waiting on the human
 
 ## Next
+
+## Deployed
+
+## Recently shipped
+
+## Open follow-ups

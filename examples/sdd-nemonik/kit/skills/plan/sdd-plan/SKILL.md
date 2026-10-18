@@ -12,7 +12,8 @@ Documents, formats and the read/write calls are in `sdd-artifacts`; scenario wri
 
 - Read the project key from `nemonik.json`. Missing or still `your-nemonik-project`: ask for it.
 - `get` the `project`, `status` and `memory` documents. Search the `spec` documents to see the
-  capabilities.
+  capabilities. When the change needs an operational recipe (deploy, release, test setup), read
+  that section of `runbook`.
 - No `project` document: say so, ask the human the questions in its template (product, stack,
   commands, conventions, rules), and `put` it once they answer.
 - A change for the same request already exists (`get` `<id>-proposal`): ask whether to continue it
@@ -80,7 +81,7 @@ If they ask for changes, make them, run the check again, and ask again.
 
 ## 9. On "approved"
 
-1. Set the proposal's State to `approved` (get, edit, put).
+1. Set the proposal's State to `approved` with a `mode="edit"` put.
 2. From the folder that holds `nemonik.json`, launch the build kit your workflow names:
    - `nk run <build-kit> --new -- <id>`
    - add `--agent codex` if you are Codex, so the chain stays on one agent.

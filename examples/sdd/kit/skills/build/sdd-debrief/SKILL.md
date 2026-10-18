@@ -29,13 +29,18 @@ What did this change make untrue?
   code. Each requirement still holds? Fix the spec if it drifted, or report a code bug.
 - **Other docs:** README, docs, comments that describe the old behavior. List them for the human.
 - **Memory:** entries in `sdd/memory/memory.md` about files, commands or habits that no longer
-  exist. Remove or correct them.
+  exist. Remove or correct them in place.
+- **Runbook:** recipes in `sdd/memory/runbook.md` this change made wrong. Correct them in place.
 
 ## Pass 3: Currency
 
-- **Status:** read `sdd/memory/status.md` as if new to the project. Rewrite every line that is no
-  longer true, record where this change is now (built, committed, PR open or merged), update
-  `**Last updated:**`.
+- **Status:** read `sdd/memory/status.md` as if new to the project, and change it line by line. Move
+  this change to one Recently shipped line pointing at its archived change (or keep it in Waiting on
+  the human if it isn't committed yet). Correct every line that is no longer true, drop Recently
+  shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and in its
+  six sections; a recipe found there moves to `runbook.md`.
+- **Runbook:** a recurring operational recipe learned in this change goes in its `runbook.md` section.
+- **Memory:** a new how-we-work lesson is merged into its topic section of `memory.md`.
 - **Journal:** add `### YYYY-MM-DD: <id>` with what happened and what was learned.
 - **Archive:** mention old archived changes or stale notes the human might want to delete. Don't
   delete them.
@@ -51,6 +56,6 @@ Say whether the next change can move faster, the same, or slower, and why:
 ## Outputs
 
 - `sdd/changes/archive/<date>-<id>/debrief.md`: the three passes and the trust call.
-- `sdd/memory/journal.md`, `status.md`, `memory.md` updated.
+- `sdd/memory/journal.md`, `status.md`, `runbook.md`, `memory.md` updated.
 - Living spec fixes from pass 2.
 - End with the two or three findings that change what happens next.
