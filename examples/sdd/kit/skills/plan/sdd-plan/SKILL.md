@@ -9,7 +9,9 @@ Formats are in `sdd-artifacts`; scenario writing is in `sdd-scenarios`.
 
 ## 1. Orient
 
-- Read `sdd/project.md`, `sdd/memory/status.md` and `sdd/memory/memory.md` if they exist.
+- Read `sdd/project.md`, `sdd/memory/status.md` and `sdd/memory/memory.md` if they exist. When the
+  change needs an operational recipe (deploy, release, test setup), read that section of
+  `sdd/memory/runbook.md`.
 - `ls sdd/specs` and `ls sdd/changes` to see the capabilities and the changes in progress.
 - No `sdd/` folder: say so and ask whether to create it (`sdd/project.md` from the Project template
   in `sdd-artifacts`, filled in with the human's answers, plus empty `specs/`, `changes/`,

@@ -88,7 +88,7 @@ sdd/
 │   ├── tasks.md                         checkboxes, each with how to verify it
 │   └── review.md                        review rounds
 ├── changes/archive/
-└── memory/status.md, journal.md, memory.md
+└── memory/status.md, runbook.md, journal.md, memory.md
 ```
 
 Small changes write less: tier S is just a proposal and tasks. The formats are in

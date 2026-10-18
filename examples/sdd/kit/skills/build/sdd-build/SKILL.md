@@ -71,7 +71,8 @@ Only after the review is APPROVED, or skipped for tier S with the human's agreem
 1. Apply each delta to `sdd/specs/` as described in `sdd-artifacts`.
 2. Run the structure check on the living specs you changed.
 3. Move `sdd/changes/<id>/` to `sdd/changes/archive/YYYY-MM-DD-<id>/` and set State to `archived`.
-4. Update `sdd/memory/status.md`: this change is built, reviewed and folded into the specs. Leave
-   `journal.md` and `memory.md` to debrief.
+4. Update `sdd/memory/status.md`: move this change's line from In progress to Waiting on the human
+   (reviewed and folded, waiting for the commit), and update Deployed if it changed. Nothing else.
+   Leave `journal.md` and `memory.md` to debrief.
 5. Tell the human, in a few lines: what was built, test and scenario results, the review outcome,
    any contract-change decision.

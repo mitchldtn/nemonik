@@ -11,9 +11,12 @@ Three MCP tools: `put` writes, `get` reads one doc, `search` finds many.
 
 `put` replaces the whole body by default; `mode="append"` adds a section instead. Pass the same `slug` to update a doc in place.
 
+`mode="edit"` changes one passage of an existing doc: `old_str` must match exactly once, byte for byte, and is replaced with `new_str`; the rest of the doc stays as it is. The edit is refused, and nothing changes, when `old_str` is missing, empty or appears more than once, when no doc has that `slug`, or when `body` is passed too.
+
 ```mcp title="MCP"
 put(project="my-app", slug="architecture", body="...")
 put(project="my-app", slug="dev-52-journal", mode="append", body="...")
+put(project="my-app", slug="status", mode="edit", old_str="- DEV-52 in review", new_str="- DEV-52 shipped")
 put(project="my-app", slug="architecture", links=["..."])  # metadata only
 ```
 
@@ -38,5 +41,5 @@ A `ticket` alone doesn't update in place: a reworded title makes a second doc. U
 :::
 
 :::note
-Omitting `links` on a replace clears them. Pass them again.
+`links` only adds: a `put` without `links` keeps the doc's existing links.
 :::

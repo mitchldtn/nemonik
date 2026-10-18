@@ -14,9 +14,14 @@ Every call takes `project=<key>`, the `project` field of `nemonik.json`.
 - **Read one document:** `get(type="context", project=<key>, slug="<slug>")`. A "no context found"
   error means the document doesn't exist yet; it isn't a failure.
 - **List the specs:** `search(project=<key>, type="spec", since="2000-01-01T00:00:00Z", limit=100)`.
+- **Change part of a document:** `put(project=<key>, slug="<slug>", mode="edit",
+  old_str="<exact current text>", new_str="<new text>")`. `old_str` must appear exactly once; include
+  enough of the line to make it unique. Use this for every line change: ticking a task, a state, a
+  status line, a memory entry.
 - **Write or replace a document:** `put(project=<key>, slug="<slug>", title="<title>",
-  type="<type>", ticket="<id>", body="<full text>")`. A `put` replaces the whole body: to change one
-  part, `get` the document, edit it, and `put` all of it back. Always pass `slug` and `title`.
+  type="<type>", ticket="<id>", body="<full text>")`. A `put` without `mode` replaces the whole body:
+  use it only for a new document or a restructure, and `get` the document right before so you don't
+  overwrite someone else's change. Always pass `slug` and `title`.
 - **Append to the journal:** `put(project=<key>, slug="sdd-journal", title="sdd journal",
   type="journal", mode="append", body="<new entry>")`.
 - **Reading a whole change:** `get(type="context", project=<key>, ticket="<id>")` returns every
@@ -38,6 +43,7 @@ Every call takes `project=<key>`, the `project` field of `nemonik.json`.
 | `<id>-review` | `code_review` | `<id>` | review rounds, written by build |
 | `<id>-debrief` | `debrief` | `<id>` | written by debrief |
 | `status` | `status` | | current state |
+| `runbook` | `runbook` | | how to do recurring operational work |
 | `sdd-journal` | `journal` | | append only: what happened |
 | `memory` | `memory` | | how we work together |
 
@@ -272,11 +278,32 @@ changed, and the final verdict.
 
 ## Memory
 
-- `status`: `**Last updated:** YYYY-MM-DD` at the top, then what is in progress, what shipped
-  recently, what is next. Rewritten to stay true; old lines removed, not piled up.
+Change these documents line by line with `mode="edit"` (the call is under Reading and writing).
+
+- `status`: what is true now, read at the start of every session. Under 100 lines.
+
+  ```markdown
+  # Status
+
+  **Last updated:** YYYY-MM-DD
+
+  ## In progress
+  ## Waiting on the human
+  ## Next
+  ## Deployed
+  ## Recently shipped
+  ## Open follow-ups
+  ```
+
+  Exactly these sections, one line per item, linking the document that holds the detail. No history
+  (that is the journal and the debriefs), no recipes (`runbook`), no rules (`project`, `memory`).
+  Drop a Recently shipped line two weeks after its release.
+- `runbook`: how to do recurring operational work (deploys, releases, test setups, access) and the
+  environment facts it needs. One `##` section per area; read only the section you need.
 - `sdd-journal`: append only. `### YYYY-MM-DD: <id>` per entry: what happened, what was learned.
-- `memory`: how we work together: corrections from the human, confirmed approaches, gotchas.
-  Remove entries that stop being true.
+- `memory`: how we work together: corrections from the human, confirmed approaches, gotchas. One `##`
+  section per topic; merge a new entry into its topic, never add a dated section. Remove entries
+  that stop being true.
 
 ## Applying the delta (build, after review approves)
 
@@ -288,8 +315,8 @@ For each capability section of `<id>-delta`:
    (replace the block with the same name), REMOVED (delete the block), RENAMED (change the header),
    and `put` the whole spec back.
 
-Then set the proposal's State to `archived` (get, edit, put). Archived changes stay in the store under
-their ticket; nothing moves.
+Then set the proposal's State to `archived` with a `mode="edit"` put. Archived changes stay in the
+store under their ticket; nothing moves.
 
 ## Structure check
 

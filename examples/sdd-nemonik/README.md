@@ -11,7 +11,7 @@ in the nemonik context store instead of files in your repo.
 | Kit | Does | Writes (nemonik documents) |
 |---|---|---|
 | `sdd:plan` | Explores the code, asks about anything unclear, writes the change, stops for your approval, then launches build | `<id>-proposal`, `-delta`, `-design`, `-verification`, `-holdouts`, `-tasks` |
-| `sdd:build` | Builds the change test-first, runs the full verification, launches review, applies the delta to the living specs, waits for you to commit, then debriefs | code and tests (files), `spec-<capability>`, `<id>-review`, `<id>-debrief`, `sdd-journal`, `status`, `memory` |
+| `sdd:build` | Builds the change test-first, runs the full verification, launches review, applies the delta to the living specs, waits for you to commit, then debriefs | code and tests (files), `spec-<capability>`, `<id>-review`, `<id>-debrief`, `sdd-journal`, `status`, `runbook`, `memory` |
 | `sdd:review` | Reviews the change cold in its own session: proposal, then delta, then code; runs the scenarios and the holdouts; sends a verdict back | nothing (replies with `nk write`) |
 
 ```
@@ -54,7 +54,7 @@ nk run sdd:plan -- add recurring tasks
    until it replies APPROVED. Then it updates the `spec-<capability>` documents, marks the change
    archived, and proposes a commit message.
 4. Commit, then tell build it is committed. Build debriefs: what was learned, what the change made
-   untrue, and the project's `status`, `sdd-journal` and `memory`.
+   untrue, and the project's `status`, `runbook`, `sdd-journal` and `memory`.
 
 Add `--agent codex` to the first command to run the whole chain on Codex; each kit passes it on.
 
@@ -88,7 +88,9 @@ standards.
 | `<id>-holdouts` | scenarios only the reviewer reads |
 | `<id>-tasks` | checkboxes, each with how to verify it |
 | `<id>-review`, `<id>-debrief` | review rounds; the debrief |
-| `status`, `sdd-journal`, `memory` | current state, what happened, how we work |
+| `status` | current state, under 100 lines, edited line by line |
+| `runbook` | how to do recurring operational work |
+| `sdd-journal`, `memory` | what happened, how we work |
 
 Every change document carries the ticket `<id>`. The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
 
