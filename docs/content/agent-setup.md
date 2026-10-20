@@ -65,14 +65,14 @@ Find the user's terminal from `$TERM_PROGRAM` and ask them to confirm it:
 | `Apple_Terminal` | Apple Terminal |
 | `WezTerm` | WezTerm |
 
-If it is `tmux`, empty or anything else, ask which terminal they use. Take the line for it from the Window commands section of [config.md](/config.md). If their terminal isn't listed there, say so and offer a listed one they have installed.
+If it is `tmux`, empty or anything else, ask which terminal they use. Take the value for it from the Window commands section of [config.md](/config.md). If their terminal isn't listed there, say so and offer a listed one they have installed.
 
 Write it to `~/.nemonik/config.json`, keeping a `trust` value that is already there. The file accepts only `trust` and `new_window_command`; any other key makes every `nk` command fail.
 
 ```json title="~/.nemonik/config.json"
 {
   "trust": "strict",
-  "new_window_command": "osascript -e 'tell application \"Terminal\" to do script \"tmux attach -t {session}\"'"
+  "new_window_command": <the value for the user's terminal, from config.md>
 }
 ```
 
@@ -91,6 +91,16 @@ Ask the user whether a window opened attached to `nk-setup-test`. Then remove it
 ```sh title="shell"
 $ tmux kill-session -t nk-setup-test
 ```
+
+### Shift+Enter
+
+In tmux, Shift+Enter sends the message instead of starting a new line unless `extended-keys` is on. Check the user's tmux config:
+
+```sh title="shell"
+$ grep extended-keys ~/.tmux.conf ~/.config/tmux/tmux.conf
+```
+
+If it finds nothing, ask, then add the two `extended-keys` lines from the tmux settings section of [config.md](/config.md) to the file the user has, or to `~/.tmux.conf` if neither exists. Keep what is already in the file. If tmux is running, apply them with `tmux source-file` and the file's path.
 
 ## 4. Kit checks
 
