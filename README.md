@@ -34,6 +34,8 @@ Linux (installs a static binary and the `nk` alias to `~/.local/bin`):
 curl -fsSL https://raw.githubusercontent.com/mitchldtn/nemonik/main/scripts/install-linux.sh | sh
 ```
 
+To upgrade, run the same script again.
+
 More options are on the [Install](https://docs.nemonik.io/install/) page.
 
 ## Quick start

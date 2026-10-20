@@ -23,7 +23,7 @@ The script installs the same signed universal binary and the `nk` alias to `~/.l
 $ curl -fsSL https://raw.githubusercontent.com/mitchldtn/nemonik/main/scripts/install-macos.sh | sh
 ```
 
-Set `NEMONIK_VERSION` to pin a version or `NEMONIK_INSTALL_DIR` to install somewhere else.
+Set `NEMONIK_VERSION` to pin a version or `NEMONIK_INSTALL_DIR` to install somewhere else. To upgrade, run it again, with the same `NEMONIK_INSTALL_DIR` if you set one.
 
 ## Linux
 
@@ -33,7 +33,7 @@ The script installs a static binary (x86_64 or aarch64) and the `nk` alias to `~
 $ curl -fsSL https://raw.githubusercontent.com/mitchldtn/nemonik/main/scripts/install-linux.sh | sh
 ```
 
-Set `NEMONIK_VERSION` to pin a version or `NEMONIK_INSTALL_DIR` to install somewhere else. The tarballs are also on the [Releases](https://github.com/mitchldtn/nemonik/releases) page.
+Set `NEMONIK_VERSION` to pin a version or `NEMONIK_INSTALL_DIR` to install somewhere else. To upgrade, run it again, with the same `NEMONIK_INSTALL_DIR` if you set one. The tarballs are also on the [Releases](https://github.com/mitchldtn/nemonik/releases) page.
 
 HTTPS uses the system's CA certificates. Minimal container images may need `ca-certificates` installed.
 
