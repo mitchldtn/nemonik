@@ -22,6 +22,12 @@ macOS (Homebrew installs nemonik, the `nk` alias and tmux):
 brew install mitchldtn/tap/nemonik
 ```
 
+macOS without Homebrew (installs the universal binary and the `nk` alias to `~/.local/bin`; tmux comes from Homebrew or MacPorts):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/mitchldtn/nemonik/main/scripts/install-macos.sh | sh
+```
+
 Linux (installs a static binary and the `nk` alias to `~/.local/bin`):
 
 ```sh

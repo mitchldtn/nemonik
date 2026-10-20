@@ -1,8 +1,8 @@
 ---
 title: Install
 group: Getting started
-order: 3
-description: Install nemonik with Homebrew on macOS, the install script on Linux, or build it from source.
+order: 4
+description: Install nemonik with Homebrew or the install script on macOS, the install script on Linux, or build it from source.
 ---
 
 nemonik is one binary. It needs tmux, which it runs every agent in.
@@ -14,6 +14,16 @@ Homebrew installs a signed, notarized universal binary (Apple Silicon and Intel)
 ```sh title="shell"
 $ brew install mitchldtn/tap/nemonik
 ```
+
+### Without Homebrew
+
+The script installs the same signed universal binary and the `nk` alias to `~/.local/bin`. It doesn't install tmux; get it from Homebrew or MacPorts (`sudo port install tmux`). It tells you if tmux is missing.
+
+```sh title="shell"
+$ curl -fsSL https://raw.githubusercontent.com/mitchldtn/nemonik/main/scripts/install-macos.sh | sh
+```
+
+Set `NEMONIK_VERSION` to pin a version or `NEMONIK_INSTALL_DIR` to install somewhere else.
 
 ## Linux
 

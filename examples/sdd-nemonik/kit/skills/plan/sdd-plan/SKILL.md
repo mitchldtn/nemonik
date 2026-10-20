@@ -75,7 +75,8 @@ Re-`get` each finished document before writing the next one; the human may have 
 
 Summarize in a few lines: the id, the tier, the documents, the capabilities touched, any open
 question. Ask the human to review the documents (in the nemonik app, or `get` them) and reply
-"approved" or with changes. Then stop.
+"approved" or with changes. Say that this session ends once build starts, and that replying
+"approved, keep this session" keeps it open. Then stop.
 
 If they ask for changes, make them, run the check again, and ask again.
 
@@ -86,7 +87,11 @@ If they ask for changes, make them, run the check again, and ask again.
    - `nk run <build-kit> --new -- <id>`
    - add `--agent codex` if you are Codex, so the chain stays on one agent.
    - add `--yolo` only if the human asked for an unattended build (no permission prompts).
-   - If the human asked to run it in the background, or `--new` fails (no `new_window_command` in
-     `~/.nemonik/config.json`), use `--no-attach` instead and give the human the
-     `nk attach <session>` command it prints.
-3. Tell the human where build is running, and end.
+   - If `--new` fails because `new_window_command` isn't set, run it without `--new`:
+     `nk run <build-kit> -- <id>`. The human's window switches to build; `nk run` still prints
+     "Started detached session", because every session starts detached.
+   - Only if the human asked to run it in the background, use `--no-attach` instead and give the
+     human the `nk attach <session>` command it prints.
+3. Once `nk run` has succeeded, end this session: `tmux kill-session -t "$TMUX_PANE"`. If the human
+   replied "approved, keep this session", or you used `--no-attach`, don't: tell them where build is
+   running and end your turn. If `nk run` failed, keep this session and show the human the error.

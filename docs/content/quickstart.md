@@ -7,6 +7,12 @@ description: Install nemonik, run a local example kit, then log in and run a hos
 
 From install to a running agent. nemonik resolves a kit, shows you its exact content, and starts Claude Code or Codex with it.
 
+To have your agent do the setup with you, paste this into Claude Code or Codex:
+
+```text title="prompt"
+Read https://docs.nemonik.io/agent-setup.md and follow it to set me up with nemonik.
+```
+
 ## Install
 
 Homebrew installs nemonik, the `nk` alias and tmux. Other options are on the [Install](/install/) page.
@@ -26,6 +32,16 @@ $ nk run local-kit
 ```
 
 The first run shows you the kit and asks before it starts. That check is the same for every kit; see [Trust and verification](/trust/).
+
+## Open kits in new windows
+
+:::callout[Recommended]
+Set `new_window_command` in [config.json](/config/#window-commands) and start kits with `--new`. A kit that starts the next one, like sdd plan starting build, opens it in its own window. Without it, the next kit takes over the window you're in.
+:::
+
+```sh title="shell"
+$ nk run local-kit --new
+```
 
 ## Run a hosted kit
 
