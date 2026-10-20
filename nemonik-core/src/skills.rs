@@ -47,8 +47,8 @@ fn real_codex_home() -> Result<PathBuf> {
 
 // Seeds a per-session Codex home: `auth.json` and `skills/.system` are symlinked
 // (token refreshes write through), `config.toml` is copied so session edits never
-// reach the real config. Links point at the resolved file: a launch from inside a
-// Codex session inherits that session's `CODEX_HOME`, which is removed when it ends.
+// reach the real config. Links point at the fully resolved file: a launch from inside
+// a Codex session inherits that session's `CODEX_HOME`, which is removed when it ends.
 fn seed_codex_home(real: &Path, dest: &Path) -> Result<()> {
     std::fs::create_dir_all(dest.join("skills"))
         .with_context(|| format!("failed to create codex home '{}'", dest.display()))?;
@@ -285,6 +285,12 @@ mod tests {
         std::fs::write(parent.path().join("config.toml"), "parent-cfg").unwrap();
 
         seed_codex_home(parent.path(), child.path()).unwrap();
+        for rel in ["auth.json", "skills/.system"] {
+            assert_eq!(
+                std::fs::read_link(child.path().join(rel)).unwrap(),
+                std::fs::canonicalize(real.path().join(rel)).unwrap()
+            );
+        }
         drop(parent);
 
         assert_eq!(
