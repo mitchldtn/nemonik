@@ -47,15 +47,15 @@ fn real_codex_home() -> Result<PathBuf> {
 
 // Seeds a per-session Codex home: `auth.json` and `skills/.system` are symlinked
 // (token refreshes write through), `config.toml` is copied so session edits never
-// reach the real config.
+// reach the real config. Links point at the resolved file: a launch from inside a
+// Codex session inherits that session's `CODEX_HOME`, which is removed when it ends.
 fn seed_codex_home(real: &Path, dest: &Path) -> Result<()> {
     std::fs::create_dir_all(dest.join("skills"))
         .with_context(|| format!("failed to create codex home '{}'", dest.display()))?;
     let symlink_in = |rel: &str, target: PathBuf| -> Result<()> {
-        let src = real.join(rel);
-        if !src.exists() {
+        let Ok(src) = std::fs::canonicalize(real.join(rel)) else {
             return Ok(());
-        }
+        };
         let _ = std::fs::remove_file(&target);
         std::os::unix::fs::symlink(&src, &target).with_context(|| {
             format!(
@@ -271,6 +271,30 @@ mod tests {
                 .unwrap()
                 .file_type()
                 .is_symlink()
+        );
+    }
+
+    #[test]
+    fn seed_codex_home_from_a_session_home_outlives_that_session() {
+        let real = TempDir::new().unwrap();
+        let parent = TempDir::new().unwrap();
+        let child = TempDir::new().unwrap();
+        std::fs::write(real.path().join("auth.json"), "tok").unwrap();
+        std::fs::create_dir_all(real.path().join("skills/.system/imagegen")).unwrap();
+        seed_codex_home(real.path(), parent.path()).unwrap();
+        std::fs::write(parent.path().join("config.toml"), "parent-cfg").unwrap();
+
+        seed_codex_home(parent.path(), child.path()).unwrap();
+        drop(parent);
+
+        assert_eq!(
+            std::fs::read_to_string(child.path().join("auth.json")).unwrap(),
+            "tok"
+        );
+        assert!(child.path().join("skills/.system/imagegen").exists());
+        assert_eq!(
+            std::fs::read_to_string(child.path().join("config.toml")).unwrap(),
+            "parent-cfg"
         );
     }
 
