@@ -90,6 +90,9 @@ If they ask for changes, make them, run the check again, and ask again.
      "Started detached session", because every session starts detached.
    - Only if the human asked to run it in the background, use `--no-attach` instead and give the
      human the `nk attach <session>` command it prints.
-3. Once `nk run` has succeeded, end this session: `tmux kill-session -t "$TMUX_PANE"`. If the human
-   replied "approved, keep this session", or you used `--no-attach`, don't: tell them where build is
-   running and end your turn. If `nk run` failed, keep this session and show the human the error.
+3. Once `nk run` has succeeded, end this session:
+   `[ -n "$TMUX_PANE" ] && tmux kill-session -t "$TMUX_PANE"`. If the human replied "approved, keep
+   this session", you used `--no-attach`, or `$TMUX_PANE` is empty, don't: tell them where build is
+   running and end your turn. If `nk run` failed, keep this session and show the human the error; if
+   the error says the session is still running, don't launch again, give them its `nk attach`
+   command.

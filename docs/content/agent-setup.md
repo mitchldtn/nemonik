@@ -65,7 +65,7 @@ Find the user's terminal from `$TERM_PROGRAM` and ask them to confirm it:
 | `Apple_Terminal` | Apple Terminal |
 | `WezTerm` | WezTerm |
 
-If it is `tmux`, empty or anything else, ask which terminal they use. Take the line for it from [Window commands](/config/#window-commands). If their terminal isn't listed there, say so and offer a listed one they have installed.
+If it is `tmux`, empty or anything else, ask which terminal they use. Take the line for it from the Window commands section of [config.md](/config.md). If their terminal isn't listed there, say so and offer a listed one they have installed.
 
 Write it to `~/.nemonik/config.json`, keeping a `trust` value that is already there. The file accepts only `trust` and `new_window_command`; any other key makes every `nk` command fail.
 
@@ -81,6 +81,8 @@ Test it on a throwaway session. Fill `{session}` with `nk-setup-test` and run th
 ```sh title="shell"
 $ tmux new-session -d -s nk-setup-test
 ```
+
+If it fails with "duplicate session", an earlier run left `nk-setup-test` behind; ask, then remove it with `tmux kill-session -t nk-setup-test` and start again.
 
 The command is one argument to `$SHELL -c`. Most window commands contain single quotes, so don't paste it inside single quotes; read it back from `config.json`, or quote it so its own quotes survive.
 
