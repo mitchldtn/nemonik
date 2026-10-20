@@ -17,7 +17,8 @@ fail() {
   exit 1
 }
 
-[ "$(uname -s)" = Linux ] || fail "this installer is for Linux; on macOS use: brew install mitchldtn/tap/nemonik"
+[ "$(uname -s)" = Linux ] ||
+  fail "this installer is for Linux; on macOS use: brew install mitchldtn/tap/nemonik, or without Homebrew: curl -fsSL https://raw.githubusercontent.com/$REPO/main/scripts/install-macos.sh | sh"
 
 case "$(uname -m)" in
   x86_64 | amd64) target=x86_64-unknown-linux-musl ;;

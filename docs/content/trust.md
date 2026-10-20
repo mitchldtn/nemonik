@@ -1,7 +1,7 @@
 ---
 title: Trust and verification
 group: Getting started
-order: 4
+order: 5
 description: How nk verify pins a kit's hash, how nk run checks it, and the trust policy.
 ---
 

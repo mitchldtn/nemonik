@@ -63,5 +63,5 @@ On Codex, hooks aren't applied yet, `mcp_mode: only` can't be enforced, and an h
 :::
 
 :::note
-On Codex, a kit with skills gets its own `CODEX_HOME` under `~/.nemonik/sessions/<session>/`. It links `auth.json` and `skills/.system` from your Codex home (`$CODEX_HOME`, else `~/.codex`) and copies `config.toml`. Nothing else from it is carried in, such as `AGENTS.md`, and the session doesn't appear in `codex resume`.
+On Codex, a kit with skills gets its own `CODEX_HOME` under `~/.nemonik/sessions/<session>/`. It links `auth.json` and `skills/.system` from your Codex home (`$CODEX_HOME`, else `~/.codex`) and copies `config.toml`. A kit started from inside such a session links the same files and copies that session's `config.toml`. If Codex keeps your login in the keyring (`cli_auth_credentials_store` set to `keyring` or `auto`), the session starts logged out; use the default, `file`. Nothing else from it is carried in, such as `AGENTS.md`, and the session doesn't appear in `codex resume`.
 :::
