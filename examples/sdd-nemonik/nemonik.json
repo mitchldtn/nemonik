@@ -21,6 +21,13 @@
       "mcps": "./kit/mcps.json",
       "workflow": "./kit/review.md",
       "workflow_inject": "user"
+    },
+    "sdd:deep_review": {
+      "prompt": "./kit/prompt.md",
+      "skills": ["./kit/skills/shared"],
+      "mcps": "./kit/mcps.json",
+      "workflow": "./kit/deep-review.md",
+      "workflow_inject": "user"
     }
   }
 }

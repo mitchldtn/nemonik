@@ -45,6 +45,7 @@ Every call takes `project=<key>`, the `project` field of `nemonik.json`.
 | `<id>-holdouts` | `holdout` | `<id>` | scenarios only the reviewer reads |
 | `<id>-tasks` | `tasks` | `<id>` | the task list |
 | `<id>-review` | `code_review` | `<id>` | review rounds, written by build |
+| `<id>-deep-review` | `code_review` | `<id>` | the code review, written by `sdd:deep_review` |
 | `<id>-debrief` | `debrief` | `<id>` | written by debrief |
 | `status` | `status` | | current state |
 | `runbook` | `runbook` | | how to do recurring operational work |
@@ -133,6 +134,10 @@ Rules:
 
 ## Why
 One or two sentences: the problem and why now.
+
+## Based on
+Tiers M and L: how this problem is usually solved, one line per source (with a link) and
+what the change takes from it. The code review checks the code against these.
 
 ## What changes
 - Bullets. Mark breaking changes **BREAKING**.
@@ -238,6 +243,7 @@ Build appends to Decisions and Discussion while it works. Without a design docum
 **Story:** two to four sentences: who, what they are trying to do, why it matters.
 **What could go wrong:** the integration gap this exposes.
 **Level:** A (agent runs it, binary result) | B (agent runs it, judgment needed) | C (human judges)
+**Environment:** local | deployed (<environment>) (Level A only)
 
     Given <precondition>
     When  <action>
@@ -278,7 +284,12 @@ and skipping the hard part, output that reads well but is wrong. Only the review
 ## Review: `<id>-review`
 
 Written by build from the reviewer's messages: one section per round with the findings, what build
-changed, and the final verdict.
+changed, and the final verdict. Build also records here what it changed and declined for the code
+review.
+
+## Deep review: `<id>-deep-review`
+
+Written by the code reviewer (`sdd:deep_review`) with its review template: one section per round.
 
 ## Memory
 
@@ -310,7 +321,7 @@ Change these documents in place with one `mode="edit"` put per document, all its
   section per topic; merge a new entry into its topic, never add a dated section. Remove entries
   that stop being true.
 
-## Applying the delta (build, after review approves)
+## Applying the delta (`sdd-fold`, after the final review verdict)
 
 For each capability section of `<id>-delta`:
 

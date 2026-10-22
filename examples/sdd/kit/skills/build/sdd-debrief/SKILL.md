@@ -36,9 +36,9 @@ What did this change make untrue?
 
 - **Status:** read `sdd/memory/status.md` as if new to the project, and change it line by line. Move
   this change to one Recently shipped line pointing at its archived change (or keep it in Waiting on
-  the human if it isn't committed yet). Correct every line that is no longer true, drop Recently
-  shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and in its
-  six sections; a recipe found there moves to `runbook.md`.
+  the human with what is left, such as a prod deploy). Correct every line that is no longer true,
+  drop Recently shipped lines older than two weeks, update `**Last updated:**`. Keep it under 100
+  lines and in its six sections; a recipe found there moves to `runbook.md`.
 - **Runbook:** a recurring operational recipe learned in this change goes in its `runbook.md` section.
 - **Memory:** a new how-we-work lesson is merged into its topic section of `memory.md`.
 - **Journal:** add `### YYYY-MM-DD: <id>` with what happened and what was learned.

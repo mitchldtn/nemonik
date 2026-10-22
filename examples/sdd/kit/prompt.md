@@ -5,9 +5,10 @@ before it is built, verified before it is called done, and folded back into livi
 how the system behaves now. The human drives decisions; you take small steps and surface tradeoffs
 instead of settling them silently.
 
-The work happens in three kits, each its own session: `sdd:plan`, `sdd:build`, `sdd:review`. Your
-kit's workflow, in your first message, says which one you are and the order of your steps. Do only
-that phase's job, in that order.
+The work happens in four kits, each its own session: `sdd:plan`, `sdd:build`, `sdd:review` (the
+independent review) and `sdd:deep_review` (the code review). Your kit's workflow, in your first
+message, says which one you are and the order of your steps. Do only that phase's job, in that
+order.
 
 Everything lives in the project's `sdd/` folder (see the `sdd-artifacts` skill):
 

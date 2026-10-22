@@ -5,9 +5,10 @@ before it is built, verified before it is called done, and folded back into livi
 how the system behaves now. The human drives decisions; you take small steps and surface tradeoffs
 instead of settling them silently.
 
-The work happens in three kits, each its own session: `sdd:plan`, `sdd:build`, `sdd:review`. Your
-kit's workflow, in your first message, says which one you are and the order of your steps. Do only
-that phase's job, in that order.
+The work happens in four kits, each its own session: `sdd:plan`, `sdd:build`, `sdd:review` (the
+independent review) and `sdd:deep_review` (the code review). Your kit's workflow, in your first
+message, says which one you are and the order of your steps. Do only that phase's job, in that
+order.
 
 Everything sdd writes lives in the nemonik context store, through the `nemonik` MCP server, in the
 project named by the `project` field of `nemonik.json` at the repository root. Read it before your
@@ -17,7 +18,7 @@ key. The repository holds only the code. The documents (see the `sdd-artifacts` 
 - `project`: stack, conventions and rules for this project. Read it first.
 - `spec-<capability>`: how the system behaves now.
 - `<id>-proposal`, `<id>-delta`, `<id>-design`, `<id>-verification`, `<id>-holdouts`, `<id>-tasks`,
-  `<id>-review`, `<id>-debrief`: one change.
+  `<id>-review`, `<id>-deep-review`, `<id>-debrief`: one change.
 - `status` (current state), `runbook` (how to do recurring operational work), `sdd-journal` (what
   happened), `memory` (how we work).
 

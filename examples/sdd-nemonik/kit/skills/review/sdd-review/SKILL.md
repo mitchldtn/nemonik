@@ -15,7 +15,7 @@ Read the project key from `nemonik.json`; the calls are in `sdd-artifacts`.
 3. `<id>-design` if present, `<id>-verification`, `<id>-tasks`.
 4. `<id>-holdouts`: the builder has not seen these.
 5. The code: `git diff <base>`, where `<base>` is the `**Base:**` commit in `<id>-tasks`, shows the
-   change whether it is committed or not. Read the new files `git status` lists too. If the base is
+   change, committed or not. Read the new files `git status` lists too. If the base is
    missing, not a commit, or not an ancestor of `HEAD` (`git merge-base --is-ancestor <base> HEAD`),
    read `git diff` and `git status` instead and say so in the verdict.
 
@@ -28,15 +28,19 @@ Read the project key from `nemonik.json`; the calls are in `sdd-artifacts`.
 - Bugs, edge cases, error handling, security problems, inconsistencies with the project's conventions
   (the `project` document).
 - Run the test suite yourself.
-- Run every Level A scenario in `<id>-verification` and every holdout. Record pass or fail with the
-  evidence; don't trust the builder's Results.
+- Run every Level A scenario whose Environment is `local` (or missing), and every holdout you can
+  run without a deployed environment. Record pass or fail with the evidence; don't trust the
+  builder's Results. Scenarios and holdouts that need a deployed environment are judged from the
+  builder's evidence after the deploy; re-check them read-only where you can.
 
 ## 3. Verdict
 
 Sort findings into **blocking** (wrong behavior, a failed scenario or holdout, a requirement not met),
-**should fix**, and **nit**. Give each a file and line and the evidence.
+**should fix**, and **nit**. Give each a file and line and the evidence. Each blocking finding names
+a concrete failure: the input or state, and the wrong result.
 
-The verdict is `APPROVED` only when nothing is blocking.
+The verdict is `APPROVED` only when nothing is blocking. With deployed scenarios still pending, it
+is `APPROVED for code`; the final `APPROVED` comes after their evidence.
 
 ## 4. Send it
 
@@ -44,7 +48,7 @@ Find your own session id: `tmux display-message -p '#{session_name}'`. Keep the 
 about 30 lines): long messages may arrive as pasted text the builder treats as data. Put the whole
 message in single quotes, and leave apostrophes and backticks out of it.
 
-    nk write <builder-session-id> 'REVIEW <id>: APPROVED | CHANGES NEEDED. <findings>. Reply to session <your-session-id>.'
+    nk write <builder-session-id> 'REVIEW <id>: APPROVED | APPROVED for code | CHANGES NEEDED. <findings>. Reply to session <your-session-id>.'
 
 Then wait. When the builder replies with changes, check them (run the affected scenarios and holdouts
-again) and send a new verdict. Stop after APPROVED.
+again) and send a new verdict. Stop after the final APPROVED.
