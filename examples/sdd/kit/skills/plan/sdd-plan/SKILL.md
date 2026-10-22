@@ -28,6 +28,11 @@ Formats are in `sdd-artifacts`; scenario writing is in `sdd-scenarios`.
 - Read the code the change touches: entry points, the modules involved, their tests, nearby
   patterns to copy. For a large area, use a subagent to map it and report back.
 - Read every living spec the change could touch, in full.
+- Research how the problem is usually solved: industry standards, established patterns, and how
+  well-known libraries and tools behave (web search for current information). The project's own
+  patterns and rules win. Tiers M and L record the sources in the proposal's `## Based on`, one line
+  each: the source, with a link, and what the change takes from it. The project's own code is not
+  a source here.
 - A capability the change touches has no spec yet: the delta creates it. Its ADDED requirements cover
   the existing behavior the change relies on as well as the new behavior; say which are which in the
   proposal.
@@ -65,6 +70,7 @@ Re-read each finished file from disk before writing the next one; the human may 
 - No placeholders, no `TBD`, no vague acceptance criteria.
 - Each acceptance criterion has a scenario or task that proves it; each scenario has a task that
   builds what it checks.
+- Tiers M and L: `## Based on` names real sources, and the design follows them or says why not.
 - Everything significant you read (specs, code findings, the human's answers) shows up somewhere in
   the change.
 

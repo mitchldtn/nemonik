@@ -17,6 +17,12 @@
       "skills": ["./kit/skills/shared", "./kit/skills/review"],
       "workflow": "./kit/review.md",
       "workflow_inject": "user"
+    },
+    "sdd:deep_review": {
+      "prompt": "./kit/prompt.md",
+      "skills": ["./kit/skills/shared"],
+      "workflow": "./kit/deep-review.md",
+      "workflow_inject": "user"
     }
   }
 }

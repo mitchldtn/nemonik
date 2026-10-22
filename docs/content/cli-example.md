@@ -15,7 +15,7 @@ nk example [NAME] [DIR]
 |---|---|
 | `local-kit` | One local kit with a system prompt, a skill, a hook and a workflow. |
 | `coder-reviewer` | Two kits, a coder and a reviewer, that message each other until the reviewer approves. |
-| `sdd`, `sdd-nemonik` | Plan, build and review kits that keep living specs, in local files (`sdd`) or the nemonik context store (`sdd-nemonik`). Build debriefs after you commit. See [Chaining kits](/local-kits/#example-chaining-kits). |
+| `sdd`, `sdd-nemonik` | Plan, build, review and deep review kits that keep living specs, in local files (`sdd`) or the nemonik context store (`sdd-nemonik`). Build ships only after both reviews and your go. See [Chaining kits](/local-kits/#example-chaining-kits). |
 | `michi` | The [michi](https://github.com/csepulv/michi) paired kit and a background reviewer, keeping plans and memory in local files. |
 | `openspec` | [OpenSpec](https://github.com/Fission-AI/OpenSpec) as a local kit, on Claude Code or Codex. |
 

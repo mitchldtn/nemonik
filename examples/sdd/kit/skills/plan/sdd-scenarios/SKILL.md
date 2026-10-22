@@ -40,6 +40,14 @@ Use the lenses that fit; two or three are usually enough.
 Prefer A. A scenario that can't be made A or B is often a sign the behavior isn't defined well enough
 yet; say so in the proposal's open questions.
 
+## Environment
+
+Each Level A scenario says where it runs: `local` (the test suite, a local server, a scratch
+database) or `deployed (<environment>)` (it needs a real environment, such as a staging cluster).
+Build runs local scenarios before review, and deployed ones only after both reviews approve and the
+human has deployed. Prefer local; make a scenario deployed only when a local run can't show what it
+checks.
+
 ## Pass, fail, trap
 
 Every scenario names a specific pass, a specific fail, and the **trap**: a result that looks like a

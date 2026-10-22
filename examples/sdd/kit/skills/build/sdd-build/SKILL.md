@@ -1,12 +1,12 @@
 ---
 name: sdd-build
-description: How sdd implements an approved change test-first, logs decisions, runs the full verification checklist, and after review applies the delta to the living specs and archives the change.
+description: How sdd implements an approved change test-first, commits on the change branch, logs decisions and runs the full local verification checklist before review.
 ---
 
 # sdd build
 
-Formats are in `sdd-artifacts`. The rule: nothing is done until the full verification below has run
-in this session.
+Formats are in `sdd-artifacts`. The rule: nothing is done until the local verification below has run
+in this session, and nothing ships until both reviews approve.
 
 ## 1. Pre-flight
 
@@ -48,13 +48,13 @@ Things you can't decide alone but that don't block you go in `## Discussion`.
 Scope: if the work turns out to need something the proposal didn't plan, ask before doing it, and log
 it as a decision. If the delta specs or verification need to change, edit them and say so.
 
-## 4. Verify (every item, with evidence)
+## 4. Verify locally (every item, with evidence)
 
 1. **Self-review:** read the full diff (`git diff` plus new files, except `sdd/changes/<id>/holdouts.md`)
    against each acceptance criterion.
    Look for hardcoded values, missed callers, leftover debug code, unused imports.
-2. **Scenarios:** run every Level A scenario in `verification.md` literally, step by step. Write
-   pass or fail and the evidence under `## Results`.
+2. **Scenarios:** run every Level A scenario in `verification.md` whose Environment is `local`
+   (or missing), literally, step by step. Write pass or fail and the evidence under `## Results`.
 3. **Tests:** the full suite passes.
 4. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
    validates it is updated.
@@ -62,17 +62,5 @@ it as a decision. If the delta specs or verification need to change, edit them a
 6. **Scope:** the diff matches the proposal's Scope; anything extra is logged as a decision.
 7. **Structure:** the structure check in `sdd-artifacts` passes.
 
-Fix any failure before going on. Set the proposal's State to `built`.
-
-## 5. Fold into the living specs
-
-Only after the review is APPROVED, or skipped for tier S with the human's agreement:
-
-1. Apply each delta to `sdd/specs/` as described in `sdd-artifacts`.
-2. Run the structure check on the living specs you changed.
-3. Move `sdd/changes/<id>/` to `sdd/changes/archive/YYYY-MM-DD-<id>/` and set State to `archived`.
-4. Update `sdd/memory/status.md`: move this change's line from In progress to Waiting on the human
-   (reviewed and folded, waiting for the commit), and update Deployed if it changed. Nothing else.
-   Leave `journal.md` and `memory.md` to debrief.
-5. Tell the human, in a few lines: what was built, test and scenario results, the review outcome,
-   any contract-change decision.
+Fix any failure before going on. Set the proposal's State to `built`, and commit on the change
+branch. Don't push, open a PR or deploy: that waits for both reviews and the human's go.

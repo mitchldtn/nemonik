@@ -42,10 +42,10 @@ Write `status`, `runbook` and `memory` with one put each: a `mode="edit"` put wi
 that document (passes 1 and 2 included) in its `edits` list, or one full `put` right after a `get`.
 
 - **Status:** read `status` as if new to the project, and change it in place. Move this change to one
-  Recently shipped line linking `<id>-debrief` (or keep it in Waiting on the human if it isn't
-  committed yet). Correct every line that is no longer true, drop Recently shipped lines older than
-  two weeks, update `**Last updated:**`. Keep it under 100 lines and in its six sections; a recipe
-  found there moves to `runbook`.
+  Recently shipped line linking `<id>-debrief` (or keep it in Waiting on the human with what is
+  left, such as a prod deploy). Correct every line that is no longer true, drop Recently shipped
+  lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and in its six
+  sections; a recipe found there moves to `runbook`.
 - **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section.
 - **Memory:** a new how-we-work lesson is merged into its topic section of `memory`.
 - **Journal:** append `### YYYY-MM-DD: <id>` to `sdd-journal` with what happened and what was learned.
