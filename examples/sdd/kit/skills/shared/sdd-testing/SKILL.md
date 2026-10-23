@@ -10,11 +10,12 @@ These rules win over a task's wording: skip a test they rule out and log that as
 
 ## Which tests to write
 
-- Test new logic, called directly. Behavior that crosses components is checked by a scenario.
-  Extend an existing test before adding a new one.
+- Test new logic. Tests call the code's functions directly. They don't run the program the way a
+  user does (a CLI command, an HTTP request, a page in a browser) and check what comes back:
+  scenarios do that against the real program.
+- Extend an existing test before adding a new one.
 - Don't test what can't break (a field passed through unchanged, a constant, frozen data), what only
-  checks a mock, a case another test already covers, or a scenario's steps: the scenario run is the
-  check.
+  checks a mock, or a case another test already covers.
 - Where a test is warranted, write it first and see it fail.
 
 ## What to run when

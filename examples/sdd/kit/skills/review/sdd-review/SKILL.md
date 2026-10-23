@@ -29,11 +29,11 @@ description: How the sdd reviewer reviews a built change cold, in order (proposa
   (`sdd/project.md`).
 - Build's Local verification block under `## Results`: every line has a value; a missing or empty
   line is a finding. Take the suite result from it; don't run the suite.
-- Run every Level A scenario in `verification.md` whose Environment is `local` (or missing), and
-  every holdout you can run without a deployed environment, against the real program. Record pass or
-  fail with the evidence; don't trust the builder's Results. Scenarios and holdouts that need a
-  deployed environment are judged from the builder's evidence after the deploy; re-check them
-  read-only where you can.
+- Run every Level A scenario in `verification.md` not marked `deployed`, and every holdout you can
+  run without a deployed environment, against the real program. Record pass or fail with the
+  evidence; don't trust the builder's Results. Scenarios and holdouts that need a deployed
+  environment are judged from the builder's evidence after the deploy; re-check them read-only where
+  you can.
 
 ## 3. Verdict
 

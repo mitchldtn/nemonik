@@ -211,7 +211,7 @@ capture what "working" means.
 **Story:** two to four sentences: who, what they are trying to do, why it matters.
 **What could go wrong:** the integration gap this exposes.
 **Level:** A (agent runs it, binary result) | B (agent runs it, judgment needed) | C (human judges)
-**Environment:** local | deployed (<environment>) (Level A only)
+**Environment:** deployed (<environment>) (only for a scenario that needs one)
 
     Given <precondition>
     When  <action>
@@ -244,10 +244,11 @@ Tell the human they may add their own before approving.
 ```
 
 - Order groups by dependency. Each task is small enough for one sitting.
-- Each task's Verify is a command or an observable result. Name a test in it only for new logic,
-  called directly; behavior that crosses components is checked by a scenario. Never name a test for
-  what can't break (a field passed through, a constant, frozen data), what only checks a mock, a
-  case another test covers, or a scenario's steps.
+- Each task's Verify is a command or an observable result. Name a test in it only for new logic.
+  Tests call the code's functions directly. They don't run the program the way a user does (a CLI
+  command, an HTTP request, a page in a browser) and check what comes back: scenarios do that
+  against the real program. Never name a test for what can't break (a field passed through, a
+  constant, frozen data), what only checks a mock, or a case another test covers.
 - No task runs the full suite, and no task runs the scenarios: build does both once, in local
   verification.
 - Each group carries the docs its own work needs.

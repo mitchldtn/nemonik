@@ -74,8 +74,8 @@ human:
     - Scope: <matches the proposal, or the decision that covers the extra>
 
 - **Cut:** remove the tests `sdd-testing` rules out and any code beyond the proposal's Scope.
-- **Scenarios:** run each Level A scenario whose Environment is `local` (or missing) literally, step
-  by step, against the real program, never by running a test.
+- **Scenarios:** run each Level A scenario not marked `deployed` literally, step by step, against
+  the real program, never by running a test.
 
 Every line gets a value; fix any failure before going on. Set the proposal's State to `built`, and
 commit on the change branch. Don't push, open a PR or deploy: that waits for both reviews and the

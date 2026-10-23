@@ -44,12 +44,8 @@ yet; say so in the proposal's open questions.
 
 ## Environment
 
-Each Level A scenario says where it runs: `local` (a local run of the real program: the built CLI, a
-local server, a scratch database, a headless browser) or `deployed (<environment>)` (it needs a real
-environment, such as a staging cluster). A scenario is run, never written as test code.
-Build runs local scenarios before review, and deployed ones only after both reviews approve and the
-human has deployed. Prefer local; make a scenario deployed only when a local run can't show what it
-checks.
+A scenario that needs a deployed environment says `Environment: deployed (<environment>)`; every
+other scenario runs locally against the real program.
 
 ## Pass, fail, trap
 
