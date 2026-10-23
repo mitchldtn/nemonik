@@ -72,7 +72,7 @@ order of its steps and names the next kit; the skills describe the steps. To ski
 edit `kit/build.md`, for example:
 
 ```
-1. Build and verify the change locally with the `sdd-build` skill.
+1. Build and verify the change locally with the `sdd-build` and `sdd-testing` skills.
 2. Get it reviewed with the `sdd-request-review` skill: the independent review only (review kit
    `sdd:review`). Fix and re-request until it approves.
 3. Ship only with the human's go: ask before you push and open the PRs, and again before each
