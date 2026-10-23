@@ -58,8 +58,8 @@ it as a decision. If the delta specs or verification need to change, edit them a
    against each acceptance criterion.
    Look for hardcoded values, missed callers, leftover debug code, unused imports.
 2. **Cut:** review the diff for tests and code the change doesn't need (tests that repeat another
-   test, test what can't break or only check a mock; code beyond the proposal's Scope), remove them,
-   and tell the human what you removed, or that you removed nothing.
+   test or a scenario's steps, test what can't break or only check a mock; code beyond the proposal's
+   Scope), remove them, and tell the human what you removed, or that you removed nothing.
 3. **Scenarios:** run every Level A scenario in `verification.md` whose Environment is `local`
    (or missing), literally, step by step, against the real program, never by running a test. Write
    pass or fail under `## Results` with the command you ran and the output you read.
