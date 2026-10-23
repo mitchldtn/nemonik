@@ -5,8 +5,8 @@ description: How sdd's builder runs the scenarios that need a deployed environme
 
 # sdd verify live
 
-Formats are in `sdd-artifacts`. Only after both reviews approved the code and the human has
-deployed, to each environment the scenarios name.
+Only after both reviews approved the code and the human has deployed, to each environment the
+scenarios name.
 
 1. Read `sdd/changes/<id>/verification.md`. List the Level A scenarios whose Environment is
    `deployed`.

@@ -132,7 +132,7 @@ Add `--agent codex` to the first command to run the whole chain on Codex; each k
 
 Plan sizes each change and writes only what its tier needs:
 
-- **S**, a fix, a tweak or a small behavior change within one component: a proposal and tasks.
+- **S**, a fix, a tweak or a small behavior change within one component: a proposal and tasks, plus delta specs when behavior changes.
 - **M**, a feature or a behavior change across components: also delta specs, one to three verification scenarios and at most two holdouts.
 - **L**, a change that crosses modules, adds a dependency, migrates data or has a real design question: also a design.
 

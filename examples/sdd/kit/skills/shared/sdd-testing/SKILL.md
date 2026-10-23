@@ -1,6 +1,6 @@
 ---
 name: sdd-testing
-description: The sdd test budget and which checks to run when: which tests to write, what a task's Verify line names, and what to re-run while building, in local verification and after a fix. Use when writing tasks, deciding whether to add a test, running checks or reviewing tests.
+description: The sdd test budget and which checks to run when: which tests to write, and what to run while building, in local verification and after a fix. Use when deciding whether to add a test, running checks or reviewing tests.
 ---
 
 # sdd testing
@@ -16,11 +16,6 @@ decision.
   checks a mock, a case another test already covers, or a scenario's steps: the scenario run is the
   check.
 - Where a test is warranted, write it first and see it fail.
-
-## Task Verify lines
-
-A command or an observable result. Name a test only where the rules above call for one. No task
-runs the full suite.
 
 ## What to run when
 

@@ -9,7 +9,7 @@ The work happens in four kits, each its own session: `sdd:plan`, `sdd:build`, `s
 independent review) and `sdd:code_review` (the code review). Your kit's workflow, in your first
 message, says the order of your steps. Do only your kit's job, in that order.
 
-Everything lives in the project's `sdd/` folder (see the `sdd-artifacts` skill):
+Everything lives in the project's `sdd/` folder:
 
 - `sdd/project.md`: stack, conventions and rules for this project. Read it first.
 - `sdd/specs/<capability>/spec.md`: how the system behaves now.
@@ -49,8 +49,8 @@ this session and read the output. Read a file before describing it. Recollection
 confidence comes from checks you didn't design to pass: scenarios co-designed with the human,
 holdouts you never saw, and an independent reviewer.
 
-**Scale the ceremony to the change.** A typo fix doesn't need a proposal. Use the size tiers in
-`sdd-artifacts` and don't add process the change doesn't need.
+**Scale the ceremony to the change.** A typo fix doesn't need a proposal. Don't add process the
+change doesn't need.
 
 **Reuse over reinvention.** Prefer an existing library or a pattern already in the codebase over new
 custom code. Custom code for commodity work needs a stated reason.

@@ -44,10 +44,14 @@ that document (passes 1 and 2 included) in its `edits` list, or one full `put` r
 - **Status:** read `status` as if new to the project, and change it in place. Move this change to one
   Recently shipped line linking `<id>-debrief` (or keep it in Waiting on the human with what is
   left, such as a prod deploy). Correct every line that is no longer true, drop Recently shipped
-  lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines and in its six
-  sections; a recipe found there moves to `runbook`.
-- **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section.
-- **Memory:** a new how-we-work lesson is merged into its topic section of `memory`.
+  lines older than two weeks, update `**Last updated:**`. Keep it under 100 lines, in exactly these
+  sections: In progress, Waiting on the human, Next, Deployed, Recently shipped, Open follow-ups. One
+  line per item, linking the document with the detail; no history, recipes or rules (a recipe found
+  there moves to `runbook`).
+- **Runbook:** a recurring operational recipe learned in this change goes in its `runbook` section
+  (one `##` per area).
+- **Memory:** a new how-we-work lesson is merged into its topic section of `memory` (one `##` per
+  topic, never a dated section).
 - **Journal:** append `### YYYY-MM-DD: <id>` to `sdd-journal` with what happened and what was learned.
 - **Old documents:** mention archived changes or stale documents the human might want to retire.
   Don't delete anything.

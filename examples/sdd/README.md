@@ -72,7 +72,7 @@ order of its steps and names the next kit; the skills describe the steps. To ski
 edit `kit/build.md`, for example:
 
 ```
-1. Build and verify the change locally with the `sdd-build` and `sdd-testing` skills.
+1. Build and verify the change locally with the `sdd-build`, `sdd-testing` and `sdd-artifacts` skills.
 2. Get it reviewed with the `sdd-request-review` skill: the independent review only (review kit
    `sdd:review`). Fix and re-request until it approves.
 3. Ship only with the human's go: ask before you push and open the PRs, and again before each
@@ -115,11 +115,11 @@ Plan sizes each change and writes only the files its tier needs:
 
 | Tier | When | Files |
 |---|---|---|
-| S | a fix, a tweak or a small behavior change within one component | proposal, tasks |
+| S | a fix, a tweak or a small behavior change within one component | proposal, tasks, and delta specs when behavior changes |
 | M | a feature, or a behavior change across components | S plus delta specs, verification (one to three scenarios) and holdouts (at most two) |
 | L | crosses modules, adds a dependency, migrates data, or has a real design question | M plus design |
 
-The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
+The formats are in `kit/skills/plan/sdd-plan/SKILL.md`.
 
 ## The files in this example
 
@@ -128,8 +128,8 @@ The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
 | `nemonik.json` | The four kits. |
 | `kit/plan-prompt.md`, `build-prompt.md`, `review-prompt.md`, `code-review-prompt.md` | Each kit's system prompt: what sdd is, the kit's role and limits, its principles (build's also holds the persona, the code review's the review template). |
 | `kit/plan.md`, `build.md`, `review.md`, `code-review.md` | Each kit's workflow, put in the first message (`workflow_inject: "user"`), followed by your request or the change id. |
-| `kit/skills/shared/sdd-artifacts` | Every file format, the size tiers, how a delta is applied, the structure check. |
-| `kit/skills/shared/sdd-testing` | Which tests to write and which checks to run when, for every kit. |
+| `kit/skills/shared/sdd-artifacts` | Where every file lives and how changes and capabilities are named. |
+| `kit/skills/shared/sdd-testing` | Which tests to write and which checks to run when, for build and review. |
 | `kit/skills/plan/` | `sdd-plan` (the planning steps) and `sdd-scenarios` (how to write scenarios and holdouts). |
 | `kit/skills/build/` | `sdd-build` (build and verify locally), `sdd-request-review` (launch the reviewers and answer them), `sdd-verify-live` (run the deployed scenarios), `sdd-fold` (fold into the specs) and `sdd-debrief`. |
 | `kit/skills/review/sdd-review` | The reviewer's steps. |

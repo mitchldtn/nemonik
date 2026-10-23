@@ -9,7 +9,7 @@ The work happens in four kits, each its own session: `sdd:plan`, `sdd:build`, `s
 independent review) and `sdd:code_review` (the code review). Your kit's workflow, in your first
 message, says the order of your steps. Do only your kit's job, in that order.
 
-Everything lives in the project's `sdd/` folder (see the `sdd-artifacts` skill):
+Everything lives in the project's `sdd/` folder:
 
 - `sdd/project.md`: stack, conventions and rules for this project. Read it first.
 - `sdd/specs/<capability>/spec.md`: how the system behaves now.

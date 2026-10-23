@@ -20,7 +20,6 @@
     },
     "sdd:code_review": {
       "prompt": "./kit/code-review-prompt.md",
-      "skills": ["./kit/skills/shared"],
       "workflow": "./kit/code-review.md",
       "workflow_inject": "user"
     }

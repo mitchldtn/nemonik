@@ -1,6 +1,6 @@
 ---
 name: sdd-scenarios
-description: How to write sdd verification scenarios and holdouts (story-based, Level A/B/C, pass/fail/trap) and the coverage table that ties every changed requirement to a scenario or test.
+description: How to find and write sdd verification scenarios and holdouts: story-based, Level A/B/C, where they run, pass/fail/trap, and what holdouts aim at.
 ---
 
 # sdd scenarios
@@ -65,14 +65,3 @@ runtime behavior, integrations, docs, secrets) and at the shortcuts an implement
 - expectations copied from the code instead of the spec
 - doing the easy part and quietly skipping the hard part
 - output that reads well but is subtly wrong
-
-At most two per change. They are written by this planning session, not by the human, so
-tell the human they may add their own to `holdouts.md` before approving.
-
-## Coverage
-
-Every ADDED or MODIFIED requirement gets a row in the coverage table, covered by a scenario or a named
-test. A requirement nothing covers is a requirement nobody will check.
-
-Write one to three scenarios for a tier M or L change, each for behavior that crosses parts of the
-system.

@@ -74,7 +74,7 @@ order of its steps and names the next kit; the skills describe the steps. To ski
 edit `kit/build.md`, for example:
 
 ```
-1. Build and verify the change locally with the `sdd-build` and `sdd-testing` skills.
+1. Build and verify the change locally with the `sdd-build`, `sdd-testing` and `sdd-artifacts` skills.
 2. Get it reviewed with the `sdd-request-review` skill: the independent review only (review kit
    `sdd:review`). Fix and re-request until it approves.
 3. Ship only with the human's go: ask before you push and open the PRs, and again before each
@@ -115,11 +115,11 @@ Plan sizes each change and writes only the documents its tier needs:
 
 | Tier | When | Documents |
 |---|---|---|
-| S | a fix, a tweak or a small behavior change within one component | `<id>-proposal`, `<id>-tasks` |
+| S | a fix, a tweak or a small behavior change within one component | `<id>-proposal`, `<id>-tasks`, and `<id>-delta` when behavior changes |
 | M | a feature, or a behavior change across components | S plus `<id>-delta`, `<id>-verification` (one to three scenarios) and `<id>-holdouts` (at most two) |
 | L | crosses modules, adds a dependency, migrates data, or has a real design question | M plus `<id>-design` |
 
-The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
+The formats are in `kit/skills/plan/sdd-plan/SKILL.md`.
 
 ## The files in this example
 
@@ -129,7 +129,7 @@ The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
 | `kit/plan-prompt.md`, `build-prompt.md`, `review-prompt.md`, `code-review-prompt.md` | Each kit's system prompt: what sdd is, the kit's role and limits, its principles (build's also holds the persona, the code review's the review template). |
 | `kit/plan.md`, `build.md`, `review.md`, `code-review.md` | Each kit's workflow, put in the first message, followed by your request or the change id. |
 | `kit/mcps.json` | The nemonik MCP server every kit attaches. |
-| `kit/skills/` | The shared `sdd-artifacts` (documents, formats, calls) and `sdd-testing` (which tests to write, which checks to run when) skills, and each phase's skills. Build's are `sdd-build`, `sdd-request-review`, `sdd-verify-live`, `sdd-fold` and `sdd-debrief`. |
+| `kit/skills/` | The shared `sdd-artifacts` (store calls, the documents) and `sdd-testing` (which tests to write, which checks to run when) skills, and each phase's skills. Build's are `sdd-build`, `sdd-request-review`, `sdd-verify-live`, `sdd-fold` and `sdd-debrief`. |
 
 ## Limits
 

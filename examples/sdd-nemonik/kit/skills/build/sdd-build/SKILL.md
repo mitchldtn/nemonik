@@ -5,8 +5,8 @@ description: How sdd implements an approved change, commits on the change branch
 
 # sdd build
 
-Documents, formats and the read/write calls are in `sdd-artifacts`. The rule: nothing is done until
-the local verification below has run in this session, and nothing ships until both reviews approve.
+The rule: nothing is done until the local verification below has run in this session, and nothing
+ships until both reviews approve.
 
 ## 1. Pre-flight
 
@@ -20,7 +20,6 @@ the local verification below has run in this session, and nothing ships until bo
 - If `<id>-tasks` has no `**Base:**` line holding a commit (`git cat-file -e <sha>^{commit}`), add
   `**Base:** <git rev-parse HEAD>` under the title with a `mode="edit"` put. The reviewer diffs
   against it.
-- Run the full suite once for the starting state.
 - Look for an existing library or pattern before writing commodity code (parsing, dates, files).
 
 ## 2. Build, task by task
@@ -40,7 +39,14 @@ For each unchecked task in `<id>-tasks`:
 ## 3. Log decisions as you go
 
 Any choice you make without the human goes in `<id>-design`'s `## Decisions` (or a `## Decisions`
-section at the end of `<id>-tasks` when there is no design), in the format from `sdd-artifacts`:
+section at the end of `<id>-tasks` when there is no design), in this format:
+
+    ### <Decision title>
+    - **Decision:** what was chosen
+    - **Alternatives:** what else was considered
+    - **Reasoning:** why
+    - **Impact:** implementation-detail | design-choice | contract-change
+    - **Reversible:** yes | no
 
 - `implementation-detail`: log it.
 - `design-choice`: log it; the human sees it at debrief.
@@ -54,8 +60,9 @@ it as a decision. If the delta or verification need to change, edit them and say
 
 ## 4. Verify locally
 
-Fill in this block under `## Results` in `<id>-verification` (one `edits` put, or a full `put`
-right after a `get`, as in `sdd-artifacts`), and paste it into your summary to the human:
+Fill in this block under `## Results` in `<id>-verification` (at the end of `<id>-tasks` for tier
+S), in one `edits` put or a full `put` right after a `get`, and paste it into your summary to the
+human:
 
     Local verification
     - Self-review: <the full diff against each acceptance criterion: met, or what you fixed>
@@ -65,7 +72,6 @@ right after a `get`, as in `sdd-artifacts`), and paste it into your summary to t
     - Boundaries: <each reader and validator of a new type, field, value or format updated, or "none added">
     - Coverage: <for each coverage row, the scenario or test that passed>
     - Scope: <matches the proposal, or the decision that covers the extra>
-    - Structure: <the structure check in `sdd-artifacts`: pass>
 
 - **Cut:** remove the tests `sdd-testing` rules out and any code beyond the proposal's Scope.
 - **Scenarios:** run each Level A scenario whose Environment is `local` (or missing) literally, step

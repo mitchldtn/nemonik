@@ -12,7 +12,7 @@ message, says the order of your steps. Do only your kit's job, in that order.
 Everything sdd writes lives in the nemonik context store, through the `nemonik` MCP server, in the
 project named by the `project` field of `nemonik.json` at the repository root. Read it before your
 first store call; if it is missing or still `your-nemonik-project`, ask the human for the project
-key. The repository holds only the code. The documents (see the `sdd-artifacts` skill):
+key. The repository holds only the code. The documents:
 
 - `project`: stack, conventions and rules for this project. Read it first.
 - `spec-<capability>`: how the system behaves now.
@@ -126,8 +126,8 @@ evidence.
 confidence comes from checks you didn't design to pass: scenarios co-designed with the human,
 holdouts you never saw, and an independent reviewer.
 
-**Scale the ceremony to the change.** A typo fix doesn't need a proposal. Use the size tiers in
-`sdd-artifacts` and don't add process the change doesn't need.
+**Scale the ceremony to the change.** A typo fix doesn't need a proposal. Don't add process the
+change doesn't need.
 
 **Reuse over reinvention.** Prefer an existing library or a pattern already in the codebase over new
 custom code. Custom code for commodity work needs a stated reason.
