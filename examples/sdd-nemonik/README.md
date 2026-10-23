@@ -129,7 +129,7 @@ The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
 | `kit/plan-prompt.md`, `build-prompt.md`, `review-prompt.md`, `code-review-prompt.md` | Each kit's system prompt: what sdd is, the kit's role and limits, its principles (build's also holds the persona, the code review's the review template). |
 | `kit/plan.md`, `build.md`, `review.md`, `code-review.md` | Each kit's workflow, put in the first message, followed by your request or the change id. |
 | `kit/mcps.json` | The nemonik MCP server every kit attaches. |
-| `kit/skills/` | The shared `sdd-artifacts` skill (documents, formats, calls) and each phase's skills. Build's are `sdd-build`, `sdd-request-review`, `sdd-verify-live`, `sdd-fold` and `sdd-debrief`. |
+| `kit/skills/` | The shared `sdd-artifacts` (documents, formats, calls) and `sdd-testing` (which tests to write, which checks to run when) skills, and each phase's skills. Build's are `sdd-build`, `sdd-request-review`, `sdd-verify-live`, `sdd-fold` and `sdd-debrief`. |
 
 ## Limits
 

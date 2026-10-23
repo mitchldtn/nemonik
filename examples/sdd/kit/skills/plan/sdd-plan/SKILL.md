@@ -68,9 +68,8 @@ Re-read each finished file from disk before writing the next one; the human may 
 - Run the structure check in `sdd-artifacts`.
 - No placeholders, no `TBD`, no vague acceptance criteria.
 - Each acceptance criterion has a scenario or task that proves it; each scenario can be run against
-  the program as the tasks leave it, and no task adds a test that repeats a scenario's steps (the
-  scenario run is the check). A task's Verify names a test only for new logic or a seam between
-  components, never for what can't break or only checks a mock.
+  the program as the tasks leave it. Task Verify lines follow
+  `sdd-testing`.
 - Tiers M and L: `## Based on` names real sources, and the design follows them or says why not.
 - Everything significant you read (specs, code findings, the human's answers) shows up somewhere in
   the change.

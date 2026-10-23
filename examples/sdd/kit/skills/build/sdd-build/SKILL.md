@@ -1,6 +1,6 @@
 ---
 name: sdd-build
-description: How sdd implements an approved change test-first, commits on the change branch, logs decisions and runs the full local verification checklist before review.
+description: How sdd implements an approved change, commits on the change branch, logs decisions and fills in the local verification block before review.
 ---
 
 # sdd build
@@ -17,27 +17,17 @@ in this session, and nothing ships until both reviews approve.
   before mixing work into them.
 - If `tasks.md` has no `**Base:**` line holding a commit (`git cat-file -e <sha>^{commit}`), set it
   to `**Base:** <git rev-parse HEAD>` under the title. The reviewer diffs against it.
-- Run the project's test suite once so you know its starting state.
+- Run the full suite once for the starting state.
 - Look for an existing library or pattern before writing commodity code (parsing, dates, files).
 
 ## 2. Build, task by task
 
 For each unchecked task in `tasks.md`:
 
-1. Decide whether it needs a test. Test new logic and the seams between components, and extend an
-   existing test before adding a new one. Don't test what can't break (a field passed through
-   unchanged, a constant) or what only checks a mock, and don't write a test that repeats a
-   scenario's steps: the scenario run is the check. The test budget wins over a task's Verify line:
-   skip a test it rules out and log that as a decision.
-2. Where it needs a test, write the failing test first and run it to see it fail.
-3. Write the code that makes it pass.
-4. After each change, run the tests relevant to the code you changed, not the whole suite, even
-   after the last task: the full suite runs once, in local verification. Fix any test you broke
-   before moving on.
-5. Refactor only on green.
-6. Tick the task (`- [x]`).
-
-Skip test-first only if the human says so.
+1. Decide with `sdd-testing` whether it needs a test; where it does, write it first and see it fail.
+2. Write the code, then run the checks `sdd-testing` gives for a change. Fix any test you broke.
+3. Refactor only on green.
+4. Tick the task (`- [x]`).
 
 ## 3. Log decisions as you go
 
@@ -54,23 +44,25 @@ Things you can't decide alone but that don't block you go in `## Discussion`.
 Scope: if the work turns out to need something the proposal didn't plan, ask before doing it, and log
 it as a decision. If the delta specs or verification need to change, edit them and say so.
 
-## 4. Verify locally (every item, with evidence)
+## 4. Verify locally
 
-1. **Self-review:** read the full diff (`git diff` plus new files, except `sdd/changes/<id>/holdouts.md`)
-   against each acceptance criterion.
-   Look for hardcoded values, missed callers, leftover debug code, unused imports.
-2. **Cut:** review the diff for tests and code the change doesn't need (tests that repeat another
-   test or a scenario's steps, test what can't break or only check a mock; code beyond the proposal's
-   Scope), remove them, and tell the human what you removed, or that you removed nothing.
-3. **Scenarios:** run every Level A scenario in `verification.md` whose Environment is `local`
-   (or missing), literally, step by step, against the real program, never by running a test. Write
-   pass or fail under `## Results` with the command you ran and the output you read.
-4. **Tests:** run the full suite, once; it passes.
-5. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
-   validates it is updated.
-6. **Coverage:** every row in the coverage table is backed by a passing scenario or test.
-7. **Scope:** the diff matches the proposal's Scope; anything extra is logged as a decision.
-8. **Structure:** the structure check in `sdd-artifacts` passes.
+Fill in this block under `## Results` in `verification.md`, and paste it into your summary to the
+human:
 
-Fix any failure before going on. Set the proposal's State to `built`, and commit on the change
-branch. Don't push, open a PR or deploy: that waits for both reviews and the human's go.
+    Local verification
+    - Self-review: <the full diff, except `holdouts.md`, against each acceptance criterion: met, or what you fixed>
+    - Cut: <tests and code removed, or "nothing">
+    - Scenarios: <for each local scenario: the command run against the real program, its output, pass or fail>
+    - Suite: <the command and its result; run once>
+    - Boundaries: <each reader and validator of a new type, field, value or format updated, or "none added">
+    - Coverage: <for each coverage row, the scenario or test that passed>
+    - Scope: <matches the proposal, or the decision that covers the extra>
+    - Structure: <the structure check in `sdd-artifacts`: pass>
+
+- **Cut:** remove the tests `sdd-testing` rules out and any code beyond the proposal's Scope.
+- **Scenarios:** run each Level A scenario whose Environment is `local` (or missing) literally, step
+  by step, against the real program, never by running a test.
+
+Every line gets a value; fix any failure before going on. Set the proposal's State to `built`, and
+commit on the change branch. Don't push, open a PR or deploy: that waits for both reviews and the
+human's go.

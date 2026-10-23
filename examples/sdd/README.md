@@ -129,6 +129,7 @@ The formats are in `kit/skills/shared/sdd-artifacts/SKILL.md`.
 | `kit/plan-prompt.md`, `build-prompt.md`, `review-prompt.md`, `code-review-prompt.md` | Each kit's system prompt: what sdd is, the kit's role and limits, its principles (build's also holds the persona, the code review's the review template). |
 | `kit/plan.md`, `build.md`, `review.md`, `code-review.md` | Each kit's workflow, put in the first message (`workflow_inject: "user"`), followed by your request or the change id. |
 | `kit/skills/shared/sdd-artifacts` | Every file format, the size tiers, how a delta is applied, the structure check. |
+| `kit/skills/shared/sdd-testing` | Which tests to write and which checks to run when, for every kit. |
 | `kit/skills/plan/` | `sdd-plan` (the planning steps) and `sdd-scenarios` (how to write scenarios and holdouts). |
 | `kit/skills/build/` | `sdd-build` (build and verify locally), `sdd-request-review` (launch the reviewers and answer them), `sdd-verify-live` (run the deployed scenarios), `sdd-fold` (fold into the specs) and `sdd-debrief`. |
 | `kit/skills/review/sdd-review` | The reviewer's steps. |

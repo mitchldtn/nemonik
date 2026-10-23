@@ -238,7 +238,7 @@ build keeps a `## Decisions` and `## Discussion` section at the end of `tasks.md
 - **trap:** a result that looks like a pass but isn't
 
 ## Results
-(build fills this in: each scenario pass or fail, with the evidence)
+(build fills in the Local verification block from `sdd-build`)
 ```
 
 Every ADDED or MODIFIED requirement appears in Coverage with at least one scenario or a named test.
@@ -257,7 +257,7 @@ and skipping the hard part, output that reads well but is wrong. Only the review
 # <id> tasks
 
 ## 1. <Group>
-- [ ] 1.1 <task>. Verify: <test, command or observable result>
+- [ ] 1.1 <task>. Verify: <command or observable result>
 - [ ] 1.2 ...
 
 ## 2. <Group>
@@ -265,10 +265,7 @@ and skipping the hard part, output that reads well but is wrong. Only the review
 ```
 
 - Order groups by dependency. Each task is small enough for one sitting.
-- Each task says how to verify it. Write the failing test first only where the build skill's test
-  budget calls for a test.
-- No task adds a test that repeats a scenario's steps, and no task runs the full suite: build runs
-  the scenarios and the suite once, in local verification.
+- Each task says how to verify it, as `sdd-testing` describes.
 - Each group carries the docs its own work needs. No "write all tests" group at the end.
 - Only `- [x]` counts as done.
 - Build adds `**Base:** <sha>` under the title at pre-flight; plan never writes it.

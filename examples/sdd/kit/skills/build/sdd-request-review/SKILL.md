@@ -31,9 +31,8 @@ names. Nothing is pushed, opened as a PR or deployed until both approve.
      applies.
    - **Recommendation:** fix (the smallest version), skip, or ask, with one line of why.
 
-   Wait for the human's decision on each. Fix only what they approved, then re-run the tests and
-   scenarios that cover the changed code, and the full suite once if code changed (nothing for a
-   docs-only fix). Record each decision in `review.md`, then reply with
+   Wait for the human's decision on each. Fix only what they approved, and run the checks
+   `sdd-testing` gives for that fix. Record each decision in `review.md`, then reply with
    `nk write <reviewer-session-id> '<what was fixed, and what the human declined>'` (the whole
    message in single quotes, no apostrophes or backticks in it). Repeat. A verdict with no findings
    needs no report. A finding the human declined is settled: if a reviewer withholds approval only

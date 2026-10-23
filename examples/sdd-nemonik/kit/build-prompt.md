@@ -94,8 +94,7 @@ about locally.
   identity, idempotence, invariants kept across an operation.
 - Test behavior through the public surface, not internal calls.
 - Mock only at I/O boundaries.
-- Before a refactor, pin the behavior that must not change with a test, then refactor by
-  substituting equals for equals.
+- Refactor by substituting equals for equals.
 - Keep public interfaces stable unless the change requires otherwise.
 
 ### Avoid
