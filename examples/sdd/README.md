@@ -12,7 +12,7 @@ For the same workflow with the nemonik context store instead of files, see `sdd-
 | Kit | Does | Writes |
 |---|---|---|
 | `sdd:plan` | Explores the code, asks about anything unclear, writes the change folder, stops for your approval, then launches build | `sdd/changes/<id>/` |
-| `sdd:build` | Builds the change (tests for new logic and seams only), verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, archives the change, then debriefs | code, tests, `sdd/specs/`, `sdd/changes/archive/`, `sdd/memory/` |
+| `sdd:build` | Builds the change (tests for new logic only), verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, archives the change, then debriefs | code, tests, `sdd/specs/`, `sdd/changes/archive/`, `sdd/memory/` |
 | `sdd:review` | Reviews the change cold in its own session: proposal, then spec delta, then code; runs the scenarios and the holdouts against the real program, not the test suite; sends a verdict back, and a final one after the live evidence | nothing (replies with `nk write`) |
 | `sdd:code_review` | Reads the code after `sdd:review` approves it, without running anything: correctness, over-engineering, what to delete | `sdd/changes/<id>/code-review.md` |
 

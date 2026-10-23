@@ -5,13 +5,13 @@ description: The sdd test budget and which checks to run when: which tests to wr
 
 # sdd testing
 
-Scenarios are run against the real program; tests cover the logic and seams a scenario can't reach
-cheaply. These rules win over a task's wording: skip a test they rule out and log that as a
-decision.
+Scenarios are run against the real program; tests cover the logic a scenario can't reach cheaply.
+These rules win over a task's wording: skip a test they rule out and log that as a decision.
 
 ## Which tests to write
 
-- Test new logic and the seams between components. Extend an existing test before adding a new one.
+- Test new logic, called directly. Behavior that crosses components is checked by a scenario.
+  Extend an existing test before adding a new one.
 - Don't test what can't break (a field passed through unchanged, a constant, frozen data), what only
   checks a mock, a case another test already covers, or a scenario's steps: the scenario run is the
   check.

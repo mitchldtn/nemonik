@@ -244,9 +244,10 @@ Tell the human they may add their own before approving.
 ```
 
 - Order groups by dependency. Each task is small enough for one sitting.
-- Each task's Verify is a command or an observable result. Name a test in it only for new logic or a
-  seam between components, never for what can't break (a field passed through, a constant, frozen
-  data), what only checks a mock, a case another test covers, or a scenario's steps.
+- Each task's Verify is a command or an observable result. Name a test in it only for new logic,
+  called directly; behavior that crosses components is checked by a scenario. Never name a test for
+  what can't break (a field passed through, a constant, frozen data), what only checks a mock, a
+  case another test covers, or a scenario's steps.
 - No task runs the full suite, and no task runs the scenarios: build does both once, in local
   verification.
 - Each group carries the docs its own work needs.

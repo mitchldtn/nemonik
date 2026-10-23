@@ -11,7 +11,7 @@ in the nemonik context store instead of files in your repo.
 | Kit | Does | Writes (nemonik documents) |
 |---|---|---|
 | `sdd:plan` | Explores the code, asks about anything unclear, writes the change, stops for your approval, then launches build | `<id>-proposal`, `-delta`, `-design`, `-verification`, `-holdouts`, `-tasks` |
-| `sdd:build` | Builds the change (tests for new logic and seams only), verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, then debriefs | code and tests (files), `spec-<capability>`, `<id>-review`, `<id>-debrief`, `sdd-journal`, `status`, `runbook`, `memory` |
+| `sdd:build` | Builds the change (tests for new logic only), verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, then debriefs | code and tests (files), `spec-<capability>`, `<id>-review`, `<id>-debrief`, `sdd-journal`, `status`, `runbook`, `memory` |
 | `sdd:review` | Reviews the change cold in its own session: proposal, then delta, then code; runs the scenarios and the holdouts against the real program, not the test suite; sends a verdict back, and a final one after the live evidence | nothing (replies with `nk write`) |
 | `sdd:code_review` | Reads the code after `sdd:review` approves it, without running anything: correctness, over-engineering, what to delete | `<id>-code-review` |
 
