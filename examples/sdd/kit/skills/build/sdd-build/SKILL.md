@@ -27,11 +27,13 @@ For each unchecked task in `tasks.md`:
 1. Decide whether it needs a test. Test new logic and the seams between components, and extend an
    existing test before adding a new one. Don't test what can't break (a field passed through
    unchanged, a constant) or what only checks a mock, and don't write a test that repeats a
-   scenario's steps: the scenario run is the check.
+   scenario's steps: the scenario run is the check. The test budget wins over a task's Verify line:
+   skip a test it rules out and log that as a decision.
 2. Where it needs a test, write the failing test first and run it to see it fail.
 3. Write the code that makes it pass.
-4. After each change, run the tests relevant to the code you changed, not the whole suite. Fix any
-   test you broke before moving on.
+4. After each change, run the tests relevant to the code you changed, not the whole suite, even
+   after the last task: the full suite runs once, in local verification. Fix any test you broke
+   before moving on.
 5. Refactor only on green.
 6. Tick the task (`- [x]`).
 
