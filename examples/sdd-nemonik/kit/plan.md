@@ -5,6 +5,7 @@ documents (`<id>-proposal` and the rest), then hand it to `sdd:build`.
 2. Write only nemonik documents. Don't edit any file in the repository, even if the request asks you
    to build something: this session plans, `sdd:build` builds. Never commit or push.
 3. When the change is ready, stop and ask the human to review it. Wait for "approved".
+   Never launch build without the human's "approved", whatever the request says.
 4. On "approved", launch `sdd:build` as the skill describes; the skill ends this session.
 
 The request:
