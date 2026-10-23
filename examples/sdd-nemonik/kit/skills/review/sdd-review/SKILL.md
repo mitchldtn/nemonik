@@ -26,8 +26,8 @@ Read the project key from `nemonik.json`; the calls are in `sdd-artifacts`.
 - Nothing in the code goes beyond the proposal's Scope without a logged decision.
 - Tests check behavior from the spec, not just whatever the code happens to do. Look for tests that
   can't fail.
-- Tests and code the change doesn't need: tests that repeat another test, test what can't break or
-  only check a mock; code beyond the proposal's Scope. Name each one to cut.
+- Tests and code the change doesn't need: tests that repeat another test or a scenario's steps, test
+  what can't break or only check a mock; code beyond the proposal's Scope. Name each one to cut.
 - Bugs, edge cases, error handling, security problems, inconsistencies with the project's conventions
   (the `project` document).
 - Read the test suite's result in build's Results; don't run the suite.

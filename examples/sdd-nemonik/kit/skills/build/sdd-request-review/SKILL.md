@@ -10,8 +10,9 @@ reviews if the human agrees. Tiers M and L run every review the workflow names. 
 opened as a PR or deployed until both approve.
 
 1. Find your own session id: `tmux display-message -p '#{session_name}'`.
-2. From the folder that holds `nemonik.json`, launch the independent review, the review kit your
-   workflow names, in the background:
+2. Tell the human what local verification cut, or that it cut nothing. Then, from the folder that
+   holds `nemonik.json`, launch the independent review, the review kit your workflow names, in the
+   background:
 
        nk run <review-kit> --no-attach --yolo -- Review change <id>. Reply to session <your-session-id>. Deployed later: <S-numbers, or none>.
 

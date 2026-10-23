@@ -267,6 +267,8 @@ and skipping the hard part, output that reads well but is wrong. Only the review
 - Order groups by dependency. Each task is small enough for one sitting.
 - Each task says how to verify it. Write the failing test first only where the build skill's test
   budget calls for a test.
+- No task adds a test that repeats a scenario's steps, and no task runs the full suite: build runs
+  the scenarios and the suite once, in local verification.
 - Each group carries the docs its own work needs. No "write all tests" group at the end.
 - Only `- [x]` counts as done.
 - Build adds `**Base:** <sha>` under the title at pre-flight; plan never writes it.
