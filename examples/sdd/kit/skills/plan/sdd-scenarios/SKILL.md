@@ -21,7 +21,8 @@ where integration bugs live.
 
 ## Where to find them
 
-Use the lenses that fit; two or three are usually enough.
+Use the lenses that fit; two or three are usually enough. Use the abusers, events and special
+moments lenses only when the request raises them.
 
 - **Life of an object:** follow one record from creation through every state change to deletion.
 - **Users and goals:** each kind of user, what they are trying to get done.
@@ -33,7 +34,8 @@ Use the lenses that fit; two or three are usually enough.
 
 ## Levels
 
-- **A:** the agent runs it and the result is binary (a command's output, a file's contents, a test).
+- **A:** the agent runs it against the real program and the result is binary (a command's output, a
+  file's contents, a response).
 - **B:** the agent runs it but judging needs care (is the error message clear?).
 - **C:** the human judges (does the workflow feel right?).
 
@@ -42,8 +44,9 @@ yet; say so in the proposal's open questions.
 
 ## Environment
 
-Each Level A scenario says where it runs: `local` (the test suite, a local server, a scratch
-database) or `deployed (<environment>)` (it needs a real environment, such as a staging cluster).
+Each Level A scenario says where it runs: `local` (a local run of the real program: the built CLI, a
+local server, a scratch database, a headless browser) or `deployed (<environment>)` (it needs a real
+environment, such as a staging cluster). A scenario is run, never written as test code.
 Build runs local scenarios before review, and deployed ones only after both reviews approve and the
 human has deployed. Prefer local; make a scenario deployed only when a local run can't show what it
 checks.
@@ -55,15 +58,15 @@ pass but isn't. Example: "the export file exists" is a trap when it is empty.
 
 ## Holdouts
 
-Holdouts are scenarios build never sees; review runs them. Aim them at the shortcuts an implementer
-takes:
+Holdouts are scenarios build never sees; review runs them. Aim them at what tests can't see (real
+runtime behavior, integrations, docs, secrets) and at the shortcuts an implementer takes:
 
 - tests that always pass
 - expectations copied from the code instead of the spec
 - doing the easy part and quietly skipping the hard part
 - output that reads well but is subtly wrong
 
-Two or three per change are enough. They are written by this planning session, not by the human, so
+At most two per change. They are written by this planning session, not by the human, so
 tell the human they may add their own to `holdouts.md` before approving.
 
 ## Coverage
@@ -71,4 +74,5 @@ tell the human they may add their own to `holdouts.md` before approving.
 Every ADDED or MODIFIED requirement gets a row in the coverage table, covered by a scenario or a named
 test. A requirement nothing covers is a requirement nobody will check.
 
-Write three to five scenarios for a tier M change; more only when the change is large.
+Write one to three scenarios for a tier M or L change, each for behavior that crosses parts of the
+system.

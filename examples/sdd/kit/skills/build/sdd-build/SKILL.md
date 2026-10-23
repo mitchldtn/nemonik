@@ -24,12 +24,15 @@ in this session, and nothing ships until both reviews approve.
 
 For each unchecked task in `tasks.md`:
 
-1. Write the failing test first and run it to see it fail.
-2. Write the code that makes it pass.
-3. Run the whole test suite after every file you change, not just at the end. Fix any other test
-   you broke before moving on.
-4. Refactor only on green.
-5. Tick the task (`- [x]`).
+1. Decide whether it needs a test. Test new logic and the seams between components, and extend an
+   existing test before adding a new one. Don't test what can't break (a field passed through
+   unchanged, a constant) or what only checks a mock.
+2. Where it needs a test, write the failing test first and run it to see it fail.
+3. Write the code that makes it pass.
+4. After each change, run the tests relevant to the code you changed, not the whole suite. Fix any
+   test you broke before moving on.
+5. Refactor only on green.
+6. Tick the task (`- [x]`).
 
 Skip test-first only if the human says so.
 
@@ -53,14 +56,18 @@ it as a decision. If the delta specs or verification need to change, edit them a
 1. **Self-review:** read the full diff (`git diff` plus new files, except `sdd/changes/<id>/holdouts.md`)
    against each acceptance criterion.
    Look for hardcoded values, missed callers, leftover debug code, unused imports.
-2. **Scenarios:** run every Level A scenario in `verification.md` whose Environment is `local`
-   (or missing), literally, step by step. Write pass or fail and the evidence under `## Results`.
-3. **Tests:** the full suite passes.
-4. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
+2. **Cut:** review the diff for tests and code the change doesn't need (tests that repeat another
+   test, test what can't break or only check a mock; code beyond the proposal's Scope), remove them,
+   and tell the human what you removed, or that you removed nothing.
+3. **Scenarios:** run every Level A scenario in `verification.md` whose Environment is `local`
+   (or missing), literally, step by step, against the real program, never by running a test. Write
+   pass or fail under `## Results` with the command you ran and the output you read.
+4. **Tests:** run the full suite, once; it passes.
+5. **Boundaries:** if you added a type, a field, a value or a file format, every place that reads or
    validates it is updated.
-5. **Coverage:** every row in the coverage table is backed by a passing scenario or test.
-6. **Scope:** the diff matches the proposal's Scope; anything extra is logged as a decision.
-7. **Structure:** the structure check in `sdd-artifacts` passes.
+6. **Coverage:** every row in the coverage table is backed by a passing scenario or test.
+7. **Scope:** the diff matches the proposal's Scope; anything extra is logged as a decision.
+8. **Structure:** the structure check in `sdd-artifacts` passes.
 
 Fix any failure before going on. Set the proposal's State to `built`, and commit on the change
 branch. Don't push, open a PR or deploy: that waits for both reviews and the human's go.

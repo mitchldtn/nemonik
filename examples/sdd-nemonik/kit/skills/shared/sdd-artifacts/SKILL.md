@@ -45,7 +45,7 @@ Every call takes `project=<key>`, the `project` field of `nemonik.json`.
 | `<id>-holdouts` | `holdout` | `<id>` | scenarios only the reviewer reads |
 | `<id>-tasks` | `tasks` | `<id>` | the task list |
 | `<id>-review` | `code_review` | `<id>` | review rounds, written by build |
-| `<id>-deep-review` | `code_review` | `<id>` | the code review, written by `sdd:deep_review` |
+| `<id>-code-review` | `code_review` | `<id>` | the code review, written by `sdd:code_review` |
 | `<id>-debrief` | `debrief` | `<id>` | written by debrief |
 | `status` | `status` | | current state |
 | `runbook` | `runbook` | | how to do recurring operational work |
@@ -62,8 +62,8 @@ Choose the tier in the proposal and write only its documents.
 
 | Tier | When | Documents |
 |---|---|---|
-| S | small fix or tweak, behavior barely changes | proposal, tasks |
-| M | a feature or a behavior change | proposal, delta, verification, holdouts, tasks |
+| S | a fix, a tweak or a small behavior change within one component | proposal, tasks |
+| M | a feature, or a behavior change across components | proposal, delta, verification, holdouts, tasks |
 | L | crosses modules, adds a dependency, migrates data, or has a real design question | M + design |
 
 A change that alters no behavior (refactor, tooling, docs) sets `Spec change: none` in the proposal
@@ -258,10 +258,12 @@ Build appends to Decisions and Discussion while it works. Without a design docum
 ```
 
 Every ADDED or MODIFIED requirement appears in Coverage with at least one scenario or a named test.
+One scenario or test may cover several requirements.
 
 ## Holdouts: `<id>-holdouts` (tiers M and L)
 
-Two or three scenarios in the verification format, aimed at the shortcuts an implementer takes:
+At most two scenarios in the verification format, aimed at what tests can't see (real runtime
+behavior, integrations, docs, secrets) and at the shortcuts an implementer takes:
 tests that always pass, expectations derived from the code instead of the spec, doing the easy part
 and skipping the hard part, output that reads well but is wrong. Only the review kit reads it.
 
@@ -276,8 +278,9 @@ and skipping the hard part, output that reads well but is wrong. Only the review
 ```
 
 - Order groups by dependency. Each task is small enough for one sitting.
-- Each task says how to verify it. Write the failing test first.
-- Each group carries the tests and docs its own work needs. No "write all tests" group at the end.
+- Each task says how to verify it. Write the failing test first only where the build skill's test
+  budget calls for a test.
+- Each group carries the docs its own work needs. No "write all tests" group at the end.
 - Only `- [x]` counts as done.
 - Build adds `**Base:** <sha>` under the title at pre-flight; plan never writes it.
 
@@ -287,9 +290,9 @@ Written by build from the reviewer's messages: one section per round with the fi
 changed, and the final verdict. Build also records here what it changed and declined for the code
 review.
 
-## Deep review: `<id>-deep-review`
+## Code review: `<id>-code-review`
 
-Written by the code reviewer (`sdd:deep_review`) with its review template: one section per round.
+Written by the code reviewer (`sdd:code_review`) with its review template: one section per round.
 
 ## Memory
 

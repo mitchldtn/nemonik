@@ -21,17 +21,21 @@ Read the project key from `nemonik.json`; the calls are in `sdd-artifacts`.
 
 ## 2. Check
 
-- Every ADDED or MODIFIED requirement is implemented and tested. Name any that isn't.
+- Every ADDED or MODIFIED requirement is implemented and checked by a test or a scenario. Name any
+  that isn't.
 - Nothing in the code goes beyond the proposal's Scope without a logged decision.
 - Tests check behavior from the spec, not just whatever the code happens to do. Look for tests that
   can't fail.
+- Tests and code the change doesn't need: tests that repeat another test, test what can't break or
+  only check a mock; code beyond the proposal's Scope. Name each one to cut.
 - Bugs, edge cases, error handling, security problems, inconsistencies with the project's conventions
   (the `project` document).
-- Run the test suite yourself.
+- Read the test suite's result in build's Results; don't run the suite.
 - Run every Level A scenario whose Environment is `local` (or missing), and every holdout you can
-  run without a deployed environment. Record pass or fail with the evidence; don't trust the
-  builder's Results. Scenarios and holdouts that need a deployed environment are judged from the
-  builder's evidence after the deploy; re-check them read-only where you can.
+  run without a deployed environment, against the real program. Record pass or fail with the
+  evidence; don't trust the builder's Results. Scenarios and holdouts that need a deployed
+  environment are judged from the builder's evidence after the deploy; re-check them read-only where
+  you can.
 
 ## 3. Verdict
 

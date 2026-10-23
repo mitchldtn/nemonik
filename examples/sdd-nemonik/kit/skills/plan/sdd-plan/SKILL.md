@@ -34,9 +34,8 @@ Documents, formats and the read/write calls are in `sdd-artifacts`; scenario wri
   patterns and rules win. Tiers M and L record the sources in the proposal's `## Based on`, one line
   each: the source, with a link, and what the change takes from it. The project's own code is not
   a source here.
-- A capability the change touches has no spec yet: the delta creates it. Its ADDED requirements cover
-  the existing behavior the change relies on as well as the new behavior; say which are which in the
-  proposal.
+- A capability the change touches has no spec yet: the delta creates it, with ADDED requirements only
+  for the behavior the change adds or changes, not the existing behavior it relies on.
 
 ## 4. Size it
 
@@ -70,8 +69,8 @@ Re-`get` each finished document before writing the next one; the human may have 
 
 - Run the structure check in `sdd-artifacts`.
 - No placeholders, no `TBD`, no vague acceptance criteria.
-- Each acceptance criterion has a scenario or task that proves it; each scenario has a task that
-  builds what it checks.
+- Each acceptance criterion has a scenario or task that proves it; each scenario can be run against
+  the program as the tasks leave it.
 - Tiers M and L: `## Based on` names real sources, and the design follows them or says why not.
 - Everything significant you read (specs, code findings, the human's answers) shows up somewhere in
   the change.
