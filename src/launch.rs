@@ -62,8 +62,7 @@ pub(crate) fn check_session_name(name: &str) -> Result<()> {
     Ok(())
 }
 
-/// The kit's `{category}-{name}` (a local kit's name as is), lowercased, other
-/// characters replaced with `-`, starting with a letter, cut to leave room for the suffix.
+/// The kit's `{category}-{name}`, or a local kit's name.
 fn session_stem(template: &str) -> String {
     let kit = template.rsplit('/').next().unwrap_or(template);
     let mapped: String = kit
@@ -88,7 +87,6 @@ fn session_stem(template: &str) -> String {
     }
 }
 
-/// `{stem}-{6 random hex}`, drawing another ending while `taken` says tmux has the name.
 fn pick_session_name(
     template: &str,
     mut random: impl FnMut() -> Result<[u8; 3]>,
@@ -114,7 +112,6 @@ fn random_bytes() -> Result<[u8; 3]> {
     Ok(bytes)
 }
 
-/// The session name: `--name` checked against the rule and tmux, or a generated one.
 fn resolve_session_name(name: Option<&str>, template: &str) -> Result<String> {
     use nemonik_core::tmux::tmux_has_session_blocking;
     match name {

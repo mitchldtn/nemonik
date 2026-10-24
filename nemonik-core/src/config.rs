@@ -83,7 +83,6 @@ struct Config {
     trust: Option<TrustMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     new_window_command: Option<String>,
-    /// `false` turns off the herdr behavior inside herdr.
     #[serde(skip_serializing_if = "Option::is_none")]
     herdr: Option<bool>,
 }
@@ -150,8 +149,7 @@ fn inside_herdr(herdr_env: Option<&str>, config: &Config) -> bool {
     herdr_env == Some("1") && config.herdr != Some(false)
 }
 
-/// Whether to apply the herdr behavior: inside a herdr pane, and not turned off in
-/// `config.json`. The file is read only inside herdr.
+/// The file is read only inside herdr.
 pub fn herdr_active() -> Result<bool> {
     let herdr_env = std::env::var("HERDR_ENV").ok();
     if herdr_env.as_deref() != Some("1") {
