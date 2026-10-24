@@ -144,21 +144,12 @@ pub fn require_new_window_command() -> Result<String> {
     })
 }
 
-/// herdr sets `HERDR_ENV=1` in its panes.
-fn inside_herdr(herdr_env: Option<&str>, config: &Config) -> bool {
-    herdr_env == Some("1") && config.herdr != Some(false)
-}
-
-/// The file is read only inside herdr.
+/// herdr sets `HERDR_ENV=1` in its panes. The file is read only inside herdr.
 pub fn herdr_active() -> Result<bool> {
-    let herdr_env = std::env::var("HERDR_ENV").ok();
-    if herdr_env.as_deref() != Some("1") {
+    if std::env::var("HERDR_ENV").ok().as_deref() != Some("1") {
         return Ok(false);
     }
-    Ok(inside_herdr(
-        herdr_env.as_deref(),
-        &read_config_at(&config_path()?)?,
-    ))
+    Ok(read_config_at(&config_path()?)?.herdr != Some(false))
 }
 
 // Trust policy: `--trust` > NEMONIK_TRUST > `config.json` > `strict`. Never read
@@ -266,19 +257,6 @@ mod tests {
         std::fs::write(&path, r#"{"herdr": "yes"}"#).unwrap();
         let err = format!("{:#}", read_config_at(&path).unwrap_err());
         assert!(err.contains("config.json"), "{err}");
-    }
-
-    #[test]
-    fn inside_herdr_needs_herdr_env_1_and_no_herdr_false() {
-        let with = |herdr| Config {
-            herdr,
-            ..Config::default()
-        };
-        assert!(inside_herdr(Some("1"), &with(None)));
-        assert!(inside_herdr(Some("1"), &with(Some(true))));
-        assert!(!inside_herdr(Some("1"), &with(Some(false))));
-        assert!(!inside_herdr(Some("0"), &with(None)));
-        assert!(!inside_herdr(None, &with(Some(true))));
     }
 
     #[test]

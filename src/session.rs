@@ -347,7 +347,7 @@ pub fn launch(
     apply_window_title(name);
     register_session_closed_hook(&exe);
     let agent = agent_label(&spec.program);
-    record_agent(name, agent.unwrap_or(&spec.program));
+    record_agent(name, &spec.program);
 
     println!("Started detached session '{name}'.");
 

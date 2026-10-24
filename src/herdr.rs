@@ -33,6 +33,9 @@ const RETRY_INTERVAL: Duration = Duration::from_millis(250);
 /// and names the pane's herdr agent after the session. herdr refuses both until it has
 /// detected the agent in the pane, so each is retried for a few seconds. Failures are
 /// silent: herdr before 0.9.2 has no resume, and an agent name can be taken.
+/// herdr's docs say a source must send a `report-agent` state report before its resume
+/// command is accepted; herdr 0.9.5 also accepts it once it has detected the agent, and
+/// this relies on that, since a state report would override herdr's screen detection.
 pub fn report_session(session: &str, agent: &'static str) {
     let Some(pane) = std::env::var("HERDR_PANE_ID")
         .ok()
