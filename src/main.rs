@@ -1,4 +1,5 @@
 mod assemble;
+mod herdr;
 mod launch;
 mod remote;
 mod review_view;

@@ -48,7 +48,7 @@ const SESSION_SUFFIX_LEN: usize = 7;
 
 /// Session names match herdr's agent name rule, `[a-z][a-z0-9_-]{0,31}`, so a session
 /// name can also name its herdr agent.
-fn check_session_name(name: &str) -> Result<()> {
+pub(crate) fn check_session_name(name: &str) -> Result<()> {
     let mut chars = name.chars();
     let valid = chars.next().is_some_and(|c| c.is_ascii_lowercase())
         && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '_' | '-'))
@@ -496,8 +496,10 @@ pub async fn run(
     validate_remote(remote, project)?;
     // Before anything is fetched or written, so a bad or taken `--name` leaves nothing.
     let session = resolve_session_name(name.as_deref(), template)?;
-    // Fail before creating a session if `--new` has no configured command.
-    if new {
+    let herdr = nemonik_core::config::herdr_active()?;
+    // Fail before creating a session if `--new` has no configured command; inside herdr
+    // it opens a herdr tab instead.
+    if new && !herdr {
         nemonik_core::config::require_new_window_command()?;
     }
 
@@ -523,7 +525,16 @@ pub async fn run(
     for warning in &launch.warnings {
         eprintln!("nemonik: {warning}");
     }
-    let (args, env) = finish_argv(&launch, &session)?;
+    let (args, mut env) = finish_argv(&launch, &session)?;
+    if herdr {
+        // What a `nemonik run` inside the session needs to open its own herdr tab; never
+        // the pane id, which would point herdr's hooks at this pane.
+        for key in ["HERDR_ENV", "HERDR_BIN_PATH", "HERDR_SOCKET_PATH"] {
+            if let Ok(value) = std::env::var(key) {
+                env.insert(key.to_string(), value);
+            }
+        }
+    }
     let spec = nemonik_core::launchspec::LaunchSpec {
         program: agent_binary(&launch.agent).to_string(),
         args,
@@ -535,7 +546,7 @@ pub async fn run(
     };
     // `validate_remote` guarantees a project when `--remote`.
     let remote_project = if remote { project } else { None };
-    crate::session::launch(&spec, no_attach, new, remote_project)
+    crate::session::launch(&spec, no_attach, new, remote_project, herdr)
 }
 
 /// The agent's argv and env for `plan`: the options, this session's skills (Claude
