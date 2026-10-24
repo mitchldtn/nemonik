@@ -2,10 +2,10 @@
 title: config.json
 group: Reference
 order: 8
-description: Your settings in ~/.nemonik/config.json, trust and new_window_command, with window commands per terminal and tmux settings.
+description: Your settings in ~/.nemonik/config.json, trust, new_window_command and herdr, with window commands per terminal and tmux settings.
 ---
 
-Your settings, in `~/.nemonik/config.json`. Both keys are optional.
+Your settings, in `~/.nemonik/config.json`. Every key is optional.
 
 ```json title="~/.nemonik/config.json"
 {
@@ -17,7 +17,8 @@ Your settings, in `~/.nemonik/config.json`. Both keys are optional.
 | Key | What it does |
 |---|---|
 | `trust` | `strict` or `off`. Written by `nk trust`. |
-| `new_window_command` | The command `run --new` runs, with a `{session}` placeholder. |
+| `new_window_command` | The command `run --new` runs, with a `{session}` placeholder. In herdr, `--new` opens a herdr tab instead. |
+| `herdr` | `false` turns off what nemonik does in a herdr pane ([Use with herdr](/herdr/)). |
 
 ## Window commands
 

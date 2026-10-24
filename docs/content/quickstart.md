@@ -36,7 +36,7 @@ The first run shows you the kit and asks before it starts. That check is the sam
 ## Open kits in new windows
 
 :::callout[Recommended]
-Set `new_window_command` in [config.json](/config/#window-commands) and start kits with `--new`. A kit that starts the next one, like sdd plan starting build, opens it in its own window. Without it, the next kit takes over the window you're in.
+Set `new_window_command` in [config.json](/config/#window-commands) and start kits with `--new`. A kit that starts the next one, like sdd plan starting build, opens it in its own window. Without it, the next kit takes over the window you're in. In herdr, `--new` opens a herdr tab and needs no setting ([Use with herdr](/herdr/)).
 :::
 
 ```sh title="shell"

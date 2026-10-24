@@ -123,7 +123,7 @@ $ nk run sdd:plan "add recurring tasks"
 ```
 
 1. **Plan** reads `sdd/project.md`, your specs and memory, explores the code and asks you questions one at a time. It writes `sdd/changes/add-recurring-tasks/` and asks you to review it.
-2. Reply `approved`. Plan starts **build** in a new window, which needs `new_window_command` ([window commands](/config/#window-commands)); without it, build takes over your window. Plan then closes itself.
+2. Reply `approved`. Plan starts **build** in a new window, which needs `new_window_command` ([window commands](/config/#window-commands)); without it, build takes over your window. If plan was started in herdr, build opens as a herdr tab instead ([Use with herdr](/herdr/)). Plan then closes itself.
 3. Build works through the tasks, committing on the change branch, and verifies the change locally. It starts **review** in the background, then **code review** once review approves the code. Build goes back and forth with each over `nk write` until it replies APPROVED. Build shows you each review finding with its recommendation and fixes only what you approve. Nothing is pushed or deployed yet.
 4. Build asks you before it pushes, opens PRs or deploys. After a deploy it runs the scenarios that need the deployed environment and sends the evidence to review for its final verdict.
 5. Build updates `sdd/specs/`, archives the change and debriefs: what was learned, what the change made untrue, and `sdd/memory/`. It commits those files on the change branch and pushes them with your go.
