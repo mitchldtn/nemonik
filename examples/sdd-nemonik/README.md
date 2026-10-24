@@ -51,9 +51,10 @@ nk run sdd:plan -- add recurring tasks
 1. Plan reads the project's `project`, `status` and `memory` documents and its specs, explores the
    code, and asks you questions one at a time. It writes the change documents and asks you to review
    them.
-2. Reply `approved`. Plan launches build in a new window, which needs `new_window_command`
+2. Reply `approved`. Plan launches build, then closes itself. In herdr, build opens in a new herdr
+   tab. Elsewhere it opens in a new window, which needs `new_window_command`
    ([window commands](https://docs.nemonik.io/config/#window-commands)); without it, build takes
-   over your window. Plan then closes itself.
+   over your window.
 3. Build works through the tasks, committing on the change branch, and verifies the change
    locally. It launches the independent review, then the code review, each in the background, and
    goes back and forth with each until it replies APPROVED. Build shows you each review finding with

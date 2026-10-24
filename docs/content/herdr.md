@@ -21,6 +21,20 @@ $ nk run --new --name review-128 mitchldtn/code:review "review pr 128"
 $ herdr agent wait review-128 --until idle
 ```
 
+## Notifications
+
+herdr shows notifications only when `delivery` under `[ui.toast]` is set in herdr's `config.toml`. It is `off` by default.
+
+```toml title="~/.config/herdr/config.toml"
+[ui.toast]
+delivery = "terminal"
+```
+
+- `terminal`: the terminal shows them. Use it in iTerm2, Ghostty, WezTerm and kitty.
+- `system`: the operating system shows them. On macOS, install `terminal-notifier` (`brew install terminal-notifier`) so clicking one opens the terminal.
+
+herdr shows none for the tab you are on. Apply an edited config with `herdr server reload-config`.
+
 ## Sessions started outside herdr
 
 `nk attach <session>` in a herdr pane shows a session started outside herdr the same way. Sessions started by an older nemonik attach without a status.
