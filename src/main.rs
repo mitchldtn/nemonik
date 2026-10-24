@@ -8,8 +8,8 @@ mod trust;
 
 use clap::{Parser, Subcommand};
 
-/// nemonik: login once, launch Claude Code or Codex with an explicitly
-/// verified nemonik kit injected as a durable system prompt.
+/// Launch Claude Code or Codex with a kit: system prompt, skills, MCP servers,
+/// hooks and workflow.
 #[derive(Parser)]
 #[command(name = "nemonik", version)]
 struct Cli {
@@ -19,16 +19,16 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Log in via nemonik's OAuth flow; stores tokens in the OS keychain.
+    /// Log in to nemonik's server.
     Login,
-    /// Set the verify-gate policy, or show it. `strict` (default) reviews an
-    /// unpinned/changed kit before `run` launches it; `off` skips the gate
-    /// entirely (with a warning). Saved as `trust` in ~/.nemonik/config.json.
+    /// Set or print the trust policy: `strict` (default) reviews a new or changed
+    /// kit before `run` starts it, `off` skips the review. Saved in
+    /// ~/.nemonik/config.json.
     Trust {
-        /// `strict` or `off`. Omit to print the current resolved policy.
+        /// `strict` or `off`. Omit to print the current policy.
         mode: Option<String>,
     },
-    /// Fetch a kit, display it, and pin its hash if verified.
+    /// Show a kit's exact content and pin its hash when you approve it.
     Verify {
         /// Full kit name (`owner/category:name`, e.g. `mitchldtn/code:review`), or a
         /// kit alias or local kit name from `nemonik.json`.
@@ -37,7 +37,7 @@ enum Command {
         #[arg(long)]
         web: bool,
     },
-    /// Launch claude/codex with the pinned kit injected as a system prompt.
+    /// Start Claude Code or Codex in a tmux session with a kit loaded.
     Run {
         /// Full kit name (`owner/category:name`, e.g. `mitchldtn/code:review`), or a
         /// kit alias or local kit name from `nemonik.json`.
@@ -53,43 +53,38 @@ enum Command {
         /// Agent to launch.
         #[arg(long, default_value = "claude")]
         agent: launch::Agent,
-        /// Don't auto-attach to the freshly created session; print how to
-        /// attach and return to the shell. In herdr, also open it in a
-        /// background herdr tab.
+        /// Start the session in the background and print how to attach. In
+        /// herdr, also open it in a background herdr tab.
         #[arg(long)]
         no_attach: bool,
-        /// Open the session in a new terminal window instead of attaching
-        /// here, by running `new_window_command` from ~/.nemonik/config.json
-        /// (any terminal; see https://docs.nemonik.io/config/#window-commands).
-        /// In herdr, open it in a new herdr tab instead.
+        /// Open the session in a new terminal window, using `new_window_command`
+        /// from ~/.nemonik/config.json. In herdr, open it in a new herdr tab
+        /// instead.
         #[arg(long)]
         new: bool,
-        /// Skip the agent's own permission/approval prompts entirely.
+        /// Skip the agent's own permission prompts.
         #[arg(long)]
         yolo: bool,
-        /// Turn on remote control: lets your account push commands into, or
-        /// read/watch this session from another device. Requires --project.
+        /// Let your account write to or watch the session from another device.
+        /// Needs --project.
         #[arg(long)]
         remote: bool,
-        /// Bypass the verify review for this run only: launch an unpinned or
-        /// changed kit WITHOUT reviewing it, and WITHOUT pinning it. For
-        /// non-interactive/CI use; re-pass it each time (it never persists trust).
+        /// Start a new or changed kit without review and without pinning, for
+        /// this run only.
         #[arg(long)]
         yes: bool,
         /// Override the trust policy for this run only (`strict`/`off`).
         /// Precedence: this flag > NEMONIK_TRUST > ~/.nemonik/config.json > strict.
         #[arg(long)]
         trust: Option<String>,
-        /// Initial task for the agent, no quoting needed.
+        /// The agent's first task.
         #[arg(trailing_var_arg = true)]
         prompt: Vec<String>,
     },
-    /// Remove a session's materialized skills (`~/.nemonik/sessions/<session>/`)
-    /// and its launch spec. Runs automatically when a session closes; use this
-    /// for a session that died before cleaning up. Idempotent: safe to run
-    /// against a session with nothing to clean up.
+    /// Remove a session's skills folder (`~/.nemonik/sessions/<session>/`). Runs
+    /// on its own when a session closes; use it for a session that died first.
     CleanupSkills {
-        /// Session name (a directory under `~/.nemonik/sessions/`).
+        /// Session name.
         session: String,
     },
     /// Attach this terminal to a session.
@@ -101,8 +96,7 @@ enum Command {
     Write {
         /// Session name.
         session: String,
-        /// Text to send, no quoting needed beyond your own shell's (multi-word and
-        /// hyphen-leading text are fine).
+        /// Text to send; it can be several words and start with `-`.
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         text: Vec<String>,
     },
