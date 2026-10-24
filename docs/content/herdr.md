@@ -13,7 +13,7 @@ description: How nk run and nk attach behave in a herdr pane, with agent status,
 - After herdr restarts, the pane runs `nemonik attach <session>` on its own and shows the same session. This needs herdr 0.9.2 or newer.
 - The pane's herdr agent is named after the session, so `herdr agent wait <session>` and `herdr agent prompt <session>` work. If another pane already shows the session, the second pane's agent has no name.
 - `nk run --new` opens the session in a new herdr tab labeled with the kit and switches to it. It doesn't use `new_window_command`. `--no-attach` opens the same tab in the background.
-- The tab closes when the session ends or you detach.
+- The tab closes when the session ends or you detach. After a herdr restart, a restored pane goes back to a shell instead.
 - A kit started from inside such a session, like sdd plan starting build, opens as another tab in the same herdr session.
 
 ```sh title="shell"
