@@ -12,14 +12,14 @@ over-engineering and what to delete.
    (concurrency, migrations, auth, crypto, retries, secrets, data loss). A handful of lookups at
    most; cite each source.
 4. Write the review with the review template in your system prompt into the nemonik document
-   `<id>-code-review` (type `code_review`, ticket `<id>`), one section per round. It is the only
-   document you write.
+   `<id>-code-review`: `put(project=<key>, slug="<id>-code-review", title="<id> code review",
+   type="code_review", ticket="<id>", body=<round 1>)`. It is the only document you write.
 5. Don't edit any file, and never commit, push or post. Send the builder a short summary with
    `nk write` (under about 30 lines, in single quotes, no apostrophes or backticks):
 
        nk write <builder-session-id> 'CODE REVIEW <id>: APPROVED | CHANGES NEEDED. <required fixes>. Full review in <id>-code-review. Reply to session <your-session-id>.'
 
-6. Wait. When the builder replies, check the changes, add a round to `<id>-code-review` and send a
-   new verdict. Stop after APPROVED.
+6. Wait. When the builder replies, check the changes, add a round to `<id>-code-review` with
+   `mode="append"` and send a new verdict. Stop after APPROVED.
 
 The change id and the builder's session:
