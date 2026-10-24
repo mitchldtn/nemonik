@@ -1,6 +1,6 @@
 ---
 name: sdd-scenarios
-description: How to write sdd verification scenarios and holdouts (story-based, Level A/B/C, pass/fail/trap) and the coverage table that ties every changed requirement to a scenario or test.
+description: How to find and write sdd verification scenarios and holdouts: story-based, Level A/B/C, where they run, pass/fail/trap, and what holdouts aim at.
 ---
 
 # sdd scenarios
@@ -21,7 +21,8 @@ where integration bugs live.
 
 ## Where to find them
 
-Use the lenses that fit; two or three are usually enough.
+Use the lenses that fit; two or three are usually enough. Use the abusers, events and special
+moments lenses only when the request raises them.
 
 - **Life of an object:** follow one record from creation through every state change to deletion.
 - **Users and goals:** each kind of user, what they are trying to get done.
@@ -33,7 +34,8 @@ Use the lenses that fit; two or three are usually enough.
 
 ## Levels
 
-- **A:** the agent runs it and the result is binary (a command's output, a file's contents, a test).
+- **A:** the agent runs it against the real program and the result is binary (a command's output, a
+  file's contents, a response).
 - **B:** the agent runs it but judging needs care (is the error message clear?).
 - **C:** the human judges (does the workflow feel right?).
 
@@ -42,11 +44,8 @@ yet; say so in the proposal's open questions.
 
 ## Environment
 
-Each Level A scenario says where it runs: `local` (the test suite, a local server, a scratch
-database) or `deployed (<environment>)` (it needs a real environment, such as a staging cluster).
-Build runs local scenarios before review, and deployed ones only after both reviews approve and the
-human has deployed. Prefer local; make a scenario deployed only when a local run can't show what it
-checks.
+A scenario that needs a deployed environment says `Environment: deployed (<environment>)`; every
+other scenario runs locally against the real program.
 
 ## Pass, fail, trap
 
@@ -55,20 +54,10 @@ pass but isn't. Example: "the export file exists" is a trap when it is empty.
 
 ## Holdouts
 
-Holdouts are scenarios build never sees; review runs them. Aim them at the shortcuts an implementer
-takes:
+Holdouts are scenarios build never sees; review runs them. Aim them at what tests can't see (real
+runtime behavior, integrations, docs, secrets) and at the shortcuts an implementer takes:
 
 - tests that always pass
 - expectations copied from the code instead of the spec
 - doing the easy part and quietly skipping the hard part
 - output that reads well but is subtly wrong
-
-Two or three per change are enough. They are written by this planning session, not by the human, so
-tell the human they may add their own to `holdouts.md` before approving.
-
-## Coverage
-
-Every ADDED or MODIFIED requirement gets a row in the coverage table, covered by a scenario or a named
-test. A requirement nothing covers is a requirement nobody will check.
-
-Write three to five scenarios for a tier M change; more only when the change is large.

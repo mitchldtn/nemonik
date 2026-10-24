@@ -12,12 +12,12 @@ For the same workflow with the nemonik context store instead of files, see `sdd-
 | Kit | Does | Writes |
 |---|---|---|
 | `sdd:plan` | Explores the code, asks about anything unclear, writes the change folder, stops for your approval, then launches build | `sdd/changes/<id>/` |
-| `sdd:build` | Builds the change test-first and verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, archives the change, then debriefs | code, tests, `sdd/specs/`, `sdd/changes/archive/`, `sdd/memory/` |
-| `sdd:review` | Reviews the change cold in its own session: proposal, then spec delta, then code; runs the scenarios and the holdouts; sends a verdict back, and a final one after the live evidence | nothing (replies with `nk write`) |
-| `sdd:deep_review` | Reviews the code after `sdd:review` approves it: correctness, simplicity, tests, risks | `sdd/changes/<id>/deep-review.md` |
+| `sdd:build` | Builds the change (tests for new logic only), verifies it locally, gets both reviews, ships with your go, verifies it live, applies the delta to the living specs, archives the change, then debriefs | code, tests, `sdd/specs/`, `sdd/changes/archive/`, `sdd/memory/` |
+| `sdd:review` | Reviews the change cold in its own session: proposal, then spec delta, then code; runs the scenarios and the holdouts against the real program, not the test suite; sends a verdict back, and a final one after the live evidence | nothing (replies with `nk write`) |
+| `sdd:code_review` | Reads the code after `sdd:review` approves it, without running anything: correctness, over-engineering, what to delete | `sdd/changes/<id>/code-review.md` |
 
 ```
-sdd:plan ──(you approve)──> sdd:build <──nk write──> sdd:review, then sdd:deep_review
+sdd:plan ──(you approve)──> sdd:build <──nk write──> sdd:review, then sdd:code_review
                                 │
               both approve ─> you say ship ─> live checks ─> fold, debrief
 ```
@@ -36,7 +36,7 @@ Fill in `sdd/project.md` (stack, test command, conventions). Then review and pin
 nk verify sdd:plan
 nk verify sdd:build
 nk verify sdd:review
-nk verify sdd:deep_review
+nk verify sdd:code_review
 ```
 
 The first time your agent opens the repo, it asks whether to trust the folder.
@@ -52,11 +52,10 @@ nk run sdd:plan -- add recurring tasks
 2. Reply `approved`. Plan launches build in a new window, which needs `new_window_command`
    ([window commands](https://docs.nemonik.io/config/#window-commands)); without it, build takes
    over your window. Plan then closes itself.
-3. Build works through the tasks test-first, committing on the change branch, and verifies the
-   change locally. It launches the independent review, then the code review, each in the
-   background, and goes back and forth with each until it replies APPROVED. Build shows you each
-   review finding with its recommendation and fixes only what you approve. Nothing is pushed or
-   deployed yet.
+3. Build works through the tasks, committing on the change branch, and verifies the change
+   locally. It launches the independent review, then the code review, each in the background, and
+   goes back and forth with each until it replies APPROVED. Build shows you each review finding with
+   its recommendation and fixes only what you approve. Nothing is pushed or deployed yet.
 4. Build asks you before it pushes, opens PRs or deploys. After a deploy it runs the scenarios that
    need the deployed environment and sends the evidence to the independent reviewer for its final
    verdict.
@@ -68,12 +67,12 @@ Add `--agent codex` to the first command to run the whole chain on Codex; each k
 
 ## Changing the order
 
-Each kit's workflow (`kit/plan.md`, `kit/build.md`, `kit/review.md`, `kit/deep-review.md`) sets the
+Each kit's workflow (`kit/plan.md`, `kit/build.md`, `kit/review.md`, `kit/code-review.md`) sets the
 order of its steps and names the next kit; the skills describe the steps. To skip the code review,
 edit `kit/build.md`, for example:
 
 ```
-1. Build and verify the change locally with the `sdd-build` skill.
+1. Build and verify the change locally with the `sdd-build`, `sdd-testing` and `sdd-artifacts` skills.
 2. Get it reviewed with the `sdd-request-review` skill: the independent review only (review kit
    `sdd:review`). Fix and re-request until it approves.
 3. Ship only with the human's go: ask before you push and open the PRs, and again before each
@@ -85,8 +84,11 @@ edit `kit/build.md`, for example:
    included (add it by path without opening it), and push them on the human's go.
 ```
 
-The `## Persona` section of `kit/prompt.md` is a basic coding persona; replace it with your own
-standards.
+Each kit has its own system prompt (`kit/plan-prompt.md`, `kit/build-prompt.md`,
+`kit/review-prompt.md`, `kit/code-review-prompt.md`): what sdd is, the kit's role and limits, and the
+principles it uses. The `## Persona` section of `kit/build-prompt.md` is the author's own
+preference: a functional programming style (pure functions, explicit effects, types and laws).
+Replace it with your team's coding standards; the other kits have no persona.
 
 ## What a change looks like
 
@@ -102,22 +104,32 @@ sdd/
 │   ├── holdouts.md                      scenarios only the reviewer runs
 │   ├── tasks.md                         checkboxes, each with how to verify it
 │   ├── review.md                        review rounds
-│   └── deep-review.md                   the code review
+│   └── code-review.md                   the code review
 ├── changes/archive/
 └── memory/status.md, runbook.md, journal.md, memory.md
 ```
 
-Small changes write less: tier S is just a proposal and tasks. The formats are in
-`kit/skills/shared/sdd-artifacts/SKILL.md`.
+## Change sizes
+
+Plan sizes each change and writes only the files its tier needs:
+
+| Tier | When | Files |
+|---|---|---|
+| S | a fix, a tweak or a small behavior change within one component | proposal, tasks, and delta specs when behavior changes |
+| M | a feature, or a behavior change across components | S plus delta specs, verification (one to three scenarios) and holdouts (at most two) |
+| L | crosses modules, adds a dependency, migrates data, or has a real design question | M plus design |
+
+The formats are in `kit/skills/plan/sdd-plan/SKILL.md`.
 
 ## The files in this example
 
 | File | What it is |
 |---|---|
 | `nemonik.json` | The four kits. |
-| `kit/prompt.md` | The system prompt every kit shares: a persona and the principles. |
-| `kit/plan.md`, `build.md`, `review.md`, `deep-review.md` | Each kit's workflow (`deep-review.md` also holds the review template), put in the first message (`workflow_inject: "user"`), followed by your request or the change id. |
-| `kit/skills/shared/sdd-artifacts` | Every file format, the size tiers, how a delta is applied, the structure check. |
+| `kit/plan-prompt.md`, `build-prompt.md`, `review-prompt.md`, `code-review-prompt.md` | Each kit's system prompt: what sdd is, the kit's role and limits, its principles (build's also holds the persona, the code review's the review template). |
+| `kit/plan.md`, `build.md`, `review.md`, `code-review.md` | Each kit's workflow, put in the first message (`workflow_inject: "user"`), followed by your request or the change id. |
+| `kit/skills/shared/sdd-artifacts` | Where every file lives and how changes and capabilities are named. |
+| `kit/skills/shared/sdd-testing` | Which tests to write and which checks to run when, for build and review. |
 | `kit/skills/plan/` | `sdd-plan` (the planning steps) and `sdd-scenarios` (how to write scenarios and holdouts). |
 | `kit/skills/build/` | `sdd-build` (build and verify locally), `sdd-request-review` (launch the reviewers and answer them), `sdd-verify-live` (run the deployed scenarios), `sdd-fold` (fold into the specs) and `sdd-debrief`. |
 | `kit/skills/review/sdd-review` | The reviewer's steps. |
@@ -126,7 +138,8 @@ Small changes write less: tier S is just a proposal and tasks. The formats are i
 ## Limits
 
 - **Holdouts are written by the plan agent.** Add your own to `holdouts.md` before approving.
-- **Both reviews run with `--yolo`**, so they run your tests without permission prompts.
+- **Both reviews run with `--yolo`**, so the independent review runs your program without
+  permission prompts.
 
 ## Credits
 

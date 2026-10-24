@@ -30,8 +30,8 @@ opened as a PR or deployed until both approve.
      applies.
    - **Recommendation:** fix (the smallest version), skip, or ask, with one line of why.
 
-   Wait for the human's decision on each. Fix only what they approved (back through local
-   verification in `sdd-build`), record each decision in `<id>-review`, then reply with
+   Wait for the human's decision on each. Fix only what they approved, and run the checks
+   `sdd-testing` gives for that fix. Record each decision in `<id>-review`, then reply with
    `nk write <reviewer-session-id> '<what was fixed, and what the human declined>'` (single quotes,
    no apostrophes or backticks). Repeat. A verdict with no findings needs no report. A finding the
    human declined is settled: if a reviewer withholds approval only over declined findings, the
@@ -39,9 +39,9 @@ opened as a PR or deployed until both approve.
 6. When the independent review approves the code and the human has decided its findings, launch
    the code review, the code review kit your workflow names, the same way:
 
-       nk run <code-review-kit> --no-attach --yolo -- Deep review change <id>. Reply to session <your-session-id>.
+       nk run <code-review-kit> --no-attach --yolo -- Code review change <id>. Reply to session <your-session-id>.
 
-   Its full review lands in `<id>-deep-review`; the message carries the summary. Handle its rounds as
+   Its full review lands in `<id>-code-review`; the message carries the summary. Handle its rounds as
    in steps 4 and 5, recording what you changed and declined in `<id>-review`. If its fixes change
    the code, send them to the independent reviewer too and wait for its verdict.
 7. Close each reviewer when it is done, unless the human has a window attached to it. This one

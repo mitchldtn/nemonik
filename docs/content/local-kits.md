@@ -77,27 +77,27 @@ $ nk run coder --yolo "Add input validation to src/login.ts."
 
 ## Example: chaining kits
 
-The `sdd` example is a spec-driven workflow split into four kits: plan, build, review and deep review. Each step runs in its own session, and each kit starts the next one.
+The `sdd` example is a spec-driven workflow split into four kits: plan, build, review and code review. Each step runs in its own session, and each kit starts the next one.
 
 ```diagram title="flow"
-sdd:plan ──(you approve)──> sdd:build <──nk write──> sdd:review, then sdd:deep_review
+sdd:plan ──(you approve)──> sdd:build <──nk write──> sdd:review, then sdd:code_review
                                 │
               both approve ─> you say ship ─> live checks ─> fold, debrief
 ```
 
-All four kits share one system prompt. Each has its own skills and its own workflow, put in the first message.
+Each kit has its own system prompt (its role, its limits and the principles it uses), its own skills and its own workflow, put in the first message.
 
 ```json title="nemonik.json (two of the four kits)"
 {
   "kits": {
     "sdd:plan": {
-      "prompt":          "./kit/prompt.md",
+      "prompt":          "./kit/plan-prompt.md",
       "skills":          ["./kit/skills/shared", "./kit/skills/plan"],
       "workflow":        "./kit/plan.md",
       "workflow_inject": "user"
     },
     "sdd:review": {
-      "prompt":          "./kit/prompt.md",
+      "prompt":          "./kit/review-prompt.md",
       "skills":          ["./kit/skills/shared", "./kit/skills/review"],
       "workflow":        "./kit/review.md",
       "workflow_inject": "user"
@@ -124,11 +124,17 @@ $ nk run sdd:plan "add recurring tasks"
 
 1. **Plan** reads `sdd/project.md`, your specs and memory, explores the code and asks you questions one at a time. It writes `sdd/changes/add-recurring-tasks/` and asks you to review it.
 2. Reply `approved`. Plan starts **build** in a new window, which needs `new_window_command` ([window commands](/config/#window-commands)); without it, build takes over your window. Plan then closes itself.
-3. Build works through the tasks test-first, committing on the change branch, and verifies the change locally. It starts **review** in the background, then **deep review** once review approves the code. Build goes back and forth with each over `nk write` until it replies APPROVED. Build shows you each review finding with its recommendation and fixes only what you approve. Nothing is pushed or deployed yet.
+3. Build works through the tasks, committing on the change branch, and verifies the change locally. It starts **review** in the background, then **code review** once review approves the code. Build goes back and forth with each over `nk write` until it replies APPROVED. Build shows you each review finding with its recommendation and fixes only what you approve. Nothing is pushed or deployed yet.
 4. Build asks you before it pushes, opens PRs or deploys. After a deploy it runs the scenarios that need the deployed environment and sends the evidence to review for its final verdict.
 5. Build updates `sdd/specs/`, archives the change and debriefs: what was learned, what the change made untrue, and `sdd/memory/`. It commits those files on the change branch and pushes them with your go.
 
 Add `--agent codex` to the first command to run the whole chain on Codex; each kit passes it on.
+
+Plan sizes each change and writes only what its tier needs:
+
+- **S**, a fix, a tweak or a small behavior change within one component: a proposal and tasks, plus delta specs when behavior changes.
+- **M**, a feature or a behavior change across components: also delta specs, one to three verification scenarios and at most two holdouts.
+- **L**, a change that crosses modules, adds a dependency, migrates data or has a real design question: also a design.
 
 ### How the kits hand off
 
@@ -137,10 +143,10 @@ The handoffs are ordinary nemonik commands in each kit's skills. Plan starts bui
 ```sh title="run by the agents"
 $ nk run sdd:build --new -- add-recurring-tasks
 $ nk run sdd:review --no-attach --yolo -- Review change add-recurring-tasks. Reply to session <build session>. Deployed later: S2.
-$ nk run sdd:deep_review --no-attach --yolo -- Deep review change add-recurring-tasks. Reply to session <build session>.
+$ nk run sdd:code_review --no-attach --yolo -- Code review change add-recurring-tasks. Reply to session <build session>.
 ```
 
-Each kit's workflow sets the order of its steps and names the next kit. To change the order, for example to skip the deep review, edit `kit/build.md`.
+Each kit's workflow sets the order of its steps and names the next kit. To change the order, for example to skip the code review, edit `kit/build.md`.
 
 :::callout[Note]
 Review never sees how build reasoned, only the change itself. That is why it runs in its own session.

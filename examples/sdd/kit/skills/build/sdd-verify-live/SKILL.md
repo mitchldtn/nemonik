@@ -5,8 +5,8 @@ description: How sdd's builder runs the scenarios that need a deployed environme
 
 # sdd verify live
 
-Formats are in `sdd-artifacts`. Only after both reviews approved the code and the human has
-deployed, to each environment the scenarios name.
+Only after both reviews approved the code and the human has deployed, to each environment the
+scenarios name.
 
 1. Read `sdd/changes/<id>/verification.md`. List the Level A scenarios whose Environment is
    `deployed`.
@@ -16,7 +16,7 @@ deployed, to each environment the scenarios name.
 4. Send the evidence to the independent reviewer's session with `nk write` (short, single quotes, no
    apostrophes or backticks), pointing at `## Results`, and wait for its final verdict. Record the
    round in `review.md`.
-5. A failure is a bug like any other: fix it, go back through local verification in `sdd-build`, get
+5. A failure is a bug like any other: fix it, run the checks `sdd-testing` gives for that fix, get
    the fix reviewed by the reviewer that would have caught it, and wait for the human's go before
    deploying again.
 6. After the final APPROVED, close the reviewer as `sdd-request-review` says.
