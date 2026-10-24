@@ -55,7 +55,7 @@ If `~/.local/bin` isn't on the user's PATH, the script says so; ask before addin
 
 ## 3. New windows
 
-Kits that start other kits open them in a new terminal window with `nk run --new`. For example, the sdd plan kit starts build that way. `--new` runs `new_window_command` from `~/.nemonik/config.json`, so set it now. In a herdr pane, `--new` opens a herdr tab and doesn't use it ([Use with herdr](/herdr.md)).
+Kits that start other kits open them in a new terminal window with `nk run --new`. For example, the sdd plan kit starts build that way. `--new` runs `new_window_command` from `~/.nemonik/config.json`, so set it now. In a herdr pane, `--new` opens a herdr tab instead and doesn't need `new_window_command` ([Use with herdr](/herdr.md)).
 
 Find the user's terminal from `$TERM_PROGRAM` and ask them to confirm it:
 
