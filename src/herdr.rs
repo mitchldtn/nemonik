@@ -103,9 +103,12 @@ pub fn open_tab(session: &str, label: &str, focus: TabFocus) -> Result<()> {
     let pane = tab_pane_id(&String::from_utf8_lossy(&created.stdout))
         .filter(|_| created.status.success())
         .ok_or_else(|| {
-            let mut reason = String::from_utf8_lossy(&created.stdout).trim().to_string();
-            reason.push_str(String::from_utf8_lossy(&created.stderr).trim());
-            anyhow::anyhow!("herdr didn't create a tab: {reason}")
+            let stdout = String::from_utf8_lossy(&created.stdout);
+            let stderr = String::from_utf8_lossy(&created.stderr);
+            anyhow::anyhow!(
+                "herdr didn't create a tab: {}",
+                format!("{} {}", stdout.trim(), stderr.trim()).trim()
+            )
         })?;
     let ran = herdr()
         .args([

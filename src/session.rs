@@ -302,6 +302,11 @@ pub fn launch(
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("nemonik's own executable path is not valid UTF-8"))?;
 
+    // Checked again here, after the trust review: writing and cleaning up the skills of a
+    // name another session took meanwhile would delete that session's skills.
+    if tmux_has_session_blocking(name) {
+        anyhow::bail!("session name '{name}' is taken: tmux already has a session by that name");
+    }
     let spec_path = write_launch_spec(spec)?;
     // On failure, clean up the skills and spec: no session exists to fire the hook.
     let cleanup_partial = || {
@@ -341,15 +346,14 @@ pub fn launch(
 
     apply_window_title(name);
     register_session_closed_hook(&exe);
+    let agent = agent_label(&spec.program);
+    record_agent(name, agent.unwrap_or(&spec.program));
 
     println!("Started detached session '{name}'.");
 
     if let Some(project) = remote_project {
         crate::remote::spawn::daemon(project, name)?;
     }
-
-    let agent = agent_label(&spec.program);
-    record_agent(name, agent.unwrap_or(&spec.program));
 
     if herdr && (new || no_attach) {
         use crate::herdr::TabFocus;
