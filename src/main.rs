@@ -54,12 +54,14 @@ enum Command {
         #[arg(long, default_value = "claude")]
         agent: launch::Agent,
         /// Don't auto-attach to the freshly created session; print how to
-        /// attach and return to the shell.
+        /// attach and return to the shell. In herdr, also open it in a
+        /// background herdr tab.
         #[arg(long)]
         no_attach: bool,
         /// Open the session in a new terminal window instead of attaching
         /// here, by running `new_window_command` from ~/.nemonik/config.json
         /// (any terminal; see https://docs.nemonik.io/config/#window-commands).
+        /// In herdr, open it in a new herdr tab instead.
         #[arg(long)]
         new: bool,
         /// Skip the agent's own permission/approval prompts entirely.

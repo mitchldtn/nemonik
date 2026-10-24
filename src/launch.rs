@@ -23,7 +23,7 @@ pub enum Agent {
 pub struct RunFlags {
     /// Don't attach to the session; print how to, and return.
     pub no_attach: bool,
-    /// Open the session in a new terminal window via `new_window_command` in `~/.nemonik/config.json`.
+    /// Open the session in a new terminal window via `new_window_command` in `~/.nemonik/config.json`, or a herdr tab in herdr.
     pub new: bool,
     /// Skip the agent's own permission/approval prompts entirely.
     pub yolo: bool,
