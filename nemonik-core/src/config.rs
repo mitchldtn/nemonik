@@ -83,6 +83,9 @@ struct Config {
     trust: Option<TrustMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     new_window_command: Option<String>,
+    /// `false` turns off the herdr behavior inside herdr.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    herdr: Option<bool>,
 }
 
 fn config_path() -> Result<PathBuf> {
@@ -140,6 +143,24 @@ pub fn require_new_window_command() -> Result<String> {
              https://docs.nemonik.io/config/#window-commands), or drop --new to attach here."
         )
     })
+}
+
+/// herdr sets `HERDR_ENV=1` in its panes.
+fn inside_herdr(herdr_env: Option<&str>, config: &Config) -> bool {
+    herdr_env == Some("1") && config.herdr != Some(false)
+}
+
+/// Whether to apply the herdr behavior: inside a herdr pane, and not turned off in
+/// `config.json`. The file is read only inside herdr.
+pub fn herdr_active() -> Result<bool> {
+    let herdr_env = std::env::var("HERDR_ENV").ok();
+    if herdr_env.as_deref() != Some("1") {
+        return Ok(false);
+    }
+    Ok(inside_herdr(
+        herdr_env.as_deref(),
+        &read_config_at(&config_path()?)?,
+    ))
 }
 
 // Trust policy: `--trust` > NEMONIK_TRUST > `config.json` > `strict`. Never read
@@ -241,6 +262,28 @@ mod tests {
     }
 
     #[test]
+    fn read_config_at_rejects_a_non_boolean_herdr_naming_the_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("config.json");
+        std::fs::write(&path, r#"{"herdr": "yes"}"#).unwrap();
+        let err = format!("{:#}", read_config_at(&path).unwrap_err());
+        assert!(err.contains("config.json"), "{err}");
+    }
+
+    #[test]
+    fn inside_herdr_needs_herdr_env_1_and_no_herdr_false() {
+        let with = |herdr| Config {
+            herdr,
+            ..Config::default()
+        };
+        assert!(inside_herdr(Some("1"), &with(None)));
+        assert!(inside_herdr(Some("1"), &with(Some(true))));
+        assert!(!inside_herdr(Some("1"), &with(Some(false))));
+        assert!(!inside_herdr(Some("0"), &with(None)));
+        assert!(!inside_herdr(None, &with(Some(true))));
+    }
+
+    #[test]
     fn window_command_treats_blank_as_unset() {
         let with = |s: &str| Config {
             new_window_command: Some(s.to_string()),
@@ -254,12 +297,17 @@ mod tests {
     fn set_trust_at_keeps_the_window_command_and_writes_owner_only() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.json");
-        std::fs::write(&path, r#"{"new_window_command": "echo {session}"}"#).unwrap();
+        std::fs::write(
+            &path,
+            r#"{"new_window_command": "echo {session}", "herdr": false}"#,
+        )
+        .unwrap();
         set_trust_at(&path, TrustMode::Off).unwrap();
         set_trust_at(&path, TrustMode::Strict).unwrap();
         let config = read_config_at(&path).unwrap();
         assert_eq!(config.trust, Some(TrustMode::Strict));
         assert_eq!(window_command(&config), Some("echo {session}".to_string()));
+        assert_eq!(config.herdr, Some(false));
         let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
         assert_eq!(mode, 0o600, "config file must be owner-only");
     }
