@@ -86,9 +86,9 @@ edit `kit/build.md`, for example:
 
 Each kit has its own system prompt (`kit/plan-prompt.md`, `kit/build-prompt.md`,
 `kit/review-prompt.md`, `kit/code-review-prompt.md`): what sdd is, the kit's role and limits, and the
-principles it uses. The `## Persona` section of `kit/build-prompt.md` is the author's own preference: a functional
-programming style (pure functions, explicit effects, types and laws). Replace it with your team's
-coding standards; the other kits have no persona.
+principles it uses. The `## Persona` section of `kit/build-prompt.md` is the author's own
+preference: a functional programming style (pure functions, explicit effects, types and laws).
+Replace it with your team's coding standards; the other kits have no persona.
 
 ## What a change looks like
 
