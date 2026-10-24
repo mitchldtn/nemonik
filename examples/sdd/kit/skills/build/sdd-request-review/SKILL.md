@@ -45,10 +45,9 @@ names. Nothing is pushed, opened as a PR or deployed until both approve.
    Its full review lands in `sdd/changes/<id>/code-review.md`; the message carries the summary.
    Handle its rounds as in steps 4 and 5, recording what you changed and declined in `review.md`.
    If its fixes change the code, send them to the independent reviewer too and wait for its verdict.
-7. Close each reviewer when it is done, unless the human has a window attached to it. This one
-   command does both:
+7. Close each reviewer when it is done:
 
-       [ -z "$(tmux list-clients -t <reviewer-session-id>)" ] && tmux kill-session -t <reviewer-session-id>
+       tmux kill-session -t <reviewer-session-id>
 
    The code reviewer closes after APPROVED. The independent reviewer closes last: after its final
    APPROVED and after the code reviewer's APPROVED, so it can check any code review fix.
