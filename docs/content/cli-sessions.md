@@ -9,7 +9,7 @@ Commands for the tmux sessions `nk run` creates.
 
 | Command | What it does |
 |---|---|
-| `nk attach <session>` | Attach to a session you detached from, or one started with `--no-attach` or `--new`. |
+| `nk attach <session>` | Attach to a session you detached from, or one started with `--no-attach` or `--new`. In a herdr pane, herdr also shows the session's agent ([Use with herdr](/herdr/)). |
 | `nk write <session> <text>` | Paste text into the session and submit it. |
 | `nk read <session>` | Print the session's current screen. `--lines N` adds scrollback. |
 
@@ -18,11 +18,11 @@ Commands for the tmux sessions `nk run` creates.
 Text is pasted as a bracketed paste, so a multi-line message arrives as one message in Claude Code and Codex.
 
 ```sh title="shell"
-$ nk write nemonik-my-app-mitchldtn-code-review-a1b2c3d4 "review addressed, please look again"
+$ nk write code-review-a1b2c3 "review addressed, please look again"
 ```
 
 :::note
-Session names end in a short hash, so two runs of the same kit never share a session.
+Session names are the kit's category and name plus 6 random hex characters, like `code-review-a1b2c3`, so two runs of the same kit never share a session. `nk run --name` sets your own.
 :::
 
 :::note

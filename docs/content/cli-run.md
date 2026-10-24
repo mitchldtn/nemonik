@@ -22,10 +22,11 @@ nk run [OPTIONS] <KIT> [PROMPT]...
 
 | Option | What it does |
 |---|---|
-| `--project` | Project for `--remote` access and the session name. Defaults to `$NEMONIK_PROJECT`, then `nemonik.json`. |
+| `--project` | Project for `--remote` access. Defaults to `$NEMONIK_PROJECT`, then `nemonik.json`. |
+| `--name` | Session name instead of a generated one: 1 to 32 characters, a lowercase letter first, then lowercase letters, digits, `_` or `-`. A name tmux already has is an error. |
 | `--agent` | `claude` (default) or `codex`. |
-| `--no-attach` | Start the session in the background and print how to attach. |
-| `--new` | Open the session in a new terminal window, using `new_window_command` from [config.json](/config/). |
+| `--no-attach` | Start the session in the background and print how to attach. In herdr, also open it in a background herdr tab. |
+| `--new` | Open the session in a new terminal window, using `new_window_command` from [config.json](/config/). In herdr, open it in a new herdr tab instead ([Use with herdr](/herdr/)). |
 | `--remote` | Let your account write to or watch the session from another device. Needs `--project`. |
 | `--yes` | Start a new or changed kit without review and without pinning, for this run only. |
 | `--trust` | `strict` or `off` for this run only. |
@@ -33,7 +34,7 @@ nk run [OPTIONS] <KIT> [PROMPT]...
 
 ## The session
 
-`run` starts the agent in a named tmux session and attaches you to it. Detach with `Ctrl-b d`; come back with [nk attach](/cli-sessions/). Every run gets its own session, even for the same kit.
+`run` starts the agent in a named tmux session and attaches you to it. Detach with `Ctrl-b d`; come back with [nk attach](/cli-sessions/). Every run gets its own session, even for the same kit, named after the kit's category and name plus 6 random hex characters, like `code-review-3f9a2c`, unless you pass `--name`.
 
 ## Skills and workflow
 

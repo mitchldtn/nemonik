@@ -156,19 +156,79 @@ fn tmux_spawn_error(e: std::io::Error) -> anyhow::Error {
     }
 }
 
+/// The tmux user option that records which agent a session runs.
+const AGENT_OPTION: &str = "@nemonik-agent";
+
+/// Best-effort: without the record, a later attach inside herdr sets no agent hint.
+fn record_agent(session: &str, agent: &str) {
+    let recorded = Command::new("tmux")
+        .args([
+            "set-option",
+            "-t",
+            &nemonik_core::tmux::exact_target(session),
+            AGENT_OPTION,
+            agent,
+        ])
+        .status()
+        .is_ok_and(|s| s.success());
+    if !recorded {
+        eprintln!(
+            "warning: failed to record the agent on tmux session '{session}' (herdr won't \
+             show its status when attached with `nemonik attach`)"
+        );
+    }
+}
+
+/// herdr's label for an agent nemonik launches.
+fn agent_label(program: &str) -> Option<&'static str> {
+    match program {
+        "claude" => Some("claude"),
+        "codex" => Some("codex"),
+        _ => None,
+    }
+}
+
+/// The agent recorded on `session`; `None` for a session with no record (a `-daemon`
+/// session, or one started by an older nemonik).
+fn recorded_agent(session: &str) -> Option<&'static str> {
+    let output = Command::new("tmux")
+        .args([
+            "show-options",
+            "-v",
+            "-t",
+            &nemonik_core::tmux::exact_target(session),
+            AGENT_OPTION,
+        ])
+        .output()
+        .ok()?;
+    agent_label(String::from_utf8_lossy(&output.stdout).trim())
+}
+
 fn attach_subcommand(in_tmux: bool) -> &'static str {
     if in_tmux { "switch-client" } else { "attach" }
 }
 
-/// `switch-client` inside tmux, else `attach`. Returns the raw status.
-fn attach_or_switch(session: &str) -> std::io::Result<std::process::ExitStatus> {
-    let subcommand = attach_subcommand(std::env::var_os("TMUX").is_some());
-    Command::new("tmux")
-        .arg(subcommand)
+/// `switch-client` inside tmux, else `attach`. Returns the raw status. With `herdr_agent`
+/// (only outside tmux), the attach carries `HERDR_AGENT` so herdr shows the agent behind
+/// it, and herdr is told how to resume the session.
+fn attach_or_switch(
+    session: &str,
+    herdr_agent: Option<&'static str>,
+) -> std::io::Result<std::process::ExitStatus> {
+    let in_tmux = std::env::var_os("TMUX").is_some();
+    let mut cmd = Command::new("tmux");
+    cmd.arg(attach_subcommand(in_tmux))
         .arg("-t")
         // `=` blocks tmux prefix matching (`s` would also match `s-daemon`).
-        .arg(format!("={session}"))
-        .status()
+        .arg(format!("={session}"));
+    match herdr_agent.filter(|_| !in_tmux) {
+        Some(agent) => {
+            let mut child = cmd.env("HERDR_AGENT", agent).spawn()?;
+            crate::herdr::report_session(session, agent);
+            child.wait()
+        }
+        None => cmd.status(),
+    }
 }
 
 pub fn attach(session: &str) -> Result<()> {
@@ -176,7 +236,12 @@ pub fn attach(session: &str) -> Result<()> {
     if !tmux_has_session_blocking(session) {
         anyhow::bail!("no such session: {session}");
     }
-    let status = attach_or_switch(session)?;
+    let herdr_agent = if nemonik_core::config::herdr_active()? {
+        recorded_agent(session)
+    } else {
+        None
+    };
+    let status = attach_or_switch(session, herdr_agent)?;
     if !status.success() {
         anyhow::bail!(
             "failed to attach to session '{session}' (it exists). If you're inside tmux, \
@@ -209,18 +274,27 @@ pub fn exec_agent(spec_path: &str) -> Result<()> {
     use std::os::unix::process::CommandExt;
     let mut cmd = Command::new(&spec.program);
     cmd.args(&spec.args);
-    // `CODEX_HOME` for a Codex launch with skills; empty for Claude.
+    // herdr's variables come only from the spec: the tmux server's environment can hold
+    // those of the herdr pane it was first started from, including a stale pane id.
+    for (key, _) in std::env::vars_os() {
+        if key.to_string_lossy().starts_with("HERDR_") {
+            cmd.env_remove(key);
+        }
+    }
+    // `CODEX_HOME` for a Codex launch with skills, herdr's variables inside herdr.
     cmd.envs(&spec.env);
     Err(cmd.exec()).with_context(|| format!("failed to exec agent process '{}'", spec.program))
 }
 
 /// Creates the session, then starts remote control, opens a window, or attaches. Skills
-/// must exist before `new-session`: Claude Code scans them at startup.
+/// must exist before `new-session`: Claude Code scans them at startup. Inside herdr
+/// (`herdr`), `--new` and `--no-attach` open a herdr tab instead.
 pub fn launch(
     spec: &LaunchSpec,
     no_attach: bool,
     new: bool,
     remote_project: Option<&str>,
+    herdr: bool,
 ) -> Result<()> {
     let name = spec.session.as_str();
     let exe = std::env::current_exe().context("failed to resolve nemonik's own executable path")?;
@@ -228,6 +302,11 @@ pub fn launch(
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("nemonik's own executable path is not valid UTF-8"))?;
 
+    // Checked again here, after the trust review: writing and cleaning up the skills of a
+    // name another session took meanwhile would delete that session's skills.
+    if tmux_has_session_blocking(name) {
+        anyhow::bail!("session name '{name}' is taken: tmux already has a session by that name");
+    }
     let spec_path = write_launch_spec(spec)?;
     // On failure, clean up the skills and spec: no session exists to fire the hook.
     let cleanup_partial = || {
@@ -267,6 +346,8 @@ pub fn launch(
 
     apply_window_title(name);
     register_session_closed_hook(&exe);
+    let agent = agent_label(&spec.program);
+    record_agent(name, &spec.program);
 
     println!("Started detached session '{name}'.");
 
@@ -274,6 +355,21 @@ pub fn launch(
         crate::remote::spawn::daemon(project, name)?;
     }
 
+    if herdr && (new || no_attach) {
+        use crate::herdr::TabFocus;
+        let focus = if new {
+            TabFocus::Focused
+        } else {
+            TabFocus::Background
+        };
+        match crate::herdr::open_tab(name, &spec.template, focus) {
+            Ok(()) if new => println!("Opened in a herdr tab."),
+            Ok(()) => println!("Opened in a background herdr tab."),
+            Err(e) => eprintln!("nemonik: {e:#}"),
+        }
+        println!("Attach with: nemonik attach {name}");
+        return Ok(());
+    }
     if new {
         open_new_window(name)?;
         println!("Opened in a new window; attach elsewhere with: nemonik attach {name}");
@@ -284,7 +380,7 @@ pub fn launch(
         return Ok(());
     }
     // The session exists, so an attach failure falls back to a hint, not an error.
-    match attach_or_switch(name) {
+    match attach_or_switch(name, agent.filter(|_| herdr)) {
         Ok(status) if status.success() => Ok(()),
         _ => {
             println!("Attach with: nemonik attach {name}");
@@ -326,7 +422,7 @@ mod tests {
             env: Default::default(),
             skills_layout: Default::default(),
         };
-        assert!(launch(&spec, true, false, None).is_err());
+        assert!(launch(&spec, true, false, None, false).is_err());
         assert!(!nemonik_core::launchspec::launch_spec_path(&spec.session).exists());
     }
 

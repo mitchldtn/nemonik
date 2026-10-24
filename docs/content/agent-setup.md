@@ -55,7 +55,7 @@ If `~/.local/bin` isn't on the user's PATH, the script says so; ask before addin
 
 ## 3. New windows
 
-Kits that start other kits open them in a new terminal window with `nk run --new`. For example, the sdd plan kit starts build that way. `--new` runs `new_window_command` from `~/.nemonik/config.json`, so set it now.
+Kits that start other kits open them in a new terminal window with `nk run --new`. For example, the sdd plan kit starts build that way. `--new` runs `new_window_command` from `~/.nemonik/config.json`, so set it now. In a herdr pane, `--new` opens a herdr tab instead and doesn't need `new_window_command` ([Use with herdr](/herdr.md)).
 
 Find the user's terminal from `$TERM_PROGRAM` and ask them to confirm it:
 
@@ -67,7 +67,7 @@ Find the user's terminal from `$TERM_PROGRAM` and ask them to confirm it:
 
 If it is `tmux`, empty or anything else, ask which terminal they use. Take the value for it from the Window commands section of [config.md](/config.md). If their terminal isn't listed there, say so and offer a listed one they have installed.
 
-Write it to `~/.nemonik/config.json`, keeping a `trust` value that is already there. The file accepts only `trust` and `new_window_command`; any other key makes every `nk` command fail.
+Write it to `~/.nemonik/config.json`, keeping a `trust` value that is already there. The file accepts only `trust`, `new_window_command` and `herdr`; any other key makes every `nk` command fail.
 
 ```json title="~/.nemonik/config.json"
 {
