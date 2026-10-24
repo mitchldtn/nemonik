@@ -31,6 +31,8 @@ pub struct RunFlags {
     pub remote: bool,
     /// Launch an unpinned or changed kit without reviewing or pinning it.
     pub yes: bool,
+    /// The session name instead of a generated one.
+    pub name: Option<String>,
 }
 
 fn agent_binary(agent: &Agent) -> &'static str {
@@ -40,16 +42,93 @@ fn agent_binary(agent: &Agent) -> &'static str {
     }
 }
 
-// Unique per call (pid + nanos): `--remote` addresses sessions by this name across
-// machines, so a collision could send commands to the wrong terminal.
-fn session_name(project: Option<&str>, template: &str) -> Result<String> {
-    let project = project.unwrap_or("_");
-    let sanitized = format!("nemonik-{project}-{template}").replace([':', '/'], "-");
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .context("system clock is before the Unix epoch")?
-        .as_nanos();
-    Ok(format!("{sanitized}-{:x}{nanos:x}", std::process::id()))
+const SESSION_NAME_MAX: usize = 32;
+/// `-` plus 6 hex characters.
+const SESSION_SUFFIX_LEN: usize = 7;
+
+/// Session names match herdr's agent name rule, `[a-z][a-z0-9_-]{0,31}`, so a session
+/// name can also name its herdr agent.
+fn check_session_name(name: &str) -> Result<()> {
+    let mut chars = name.chars();
+    let valid = chars.next().is_some_and(|c| c.is_ascii_lowercase())
+        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '_' | '-'))
+        && name.len() <= SESSION_NAME_MAX;
+    if !valid {
+        anyhow::bail!(
+            "invalid session name '{name}': use 1 to 32 characters, a lowercase letter \
+             first, then lowercase letters, digits, '_' or '-'"
+        );
+    }
+    Ok(())
+}
+
+/// The kit's `{category}-{name}` (a local kit's name as is), lowercased, other
+/// characters replaced with `-`, starting with a letter, cut to leave room for the suffix.
+fn session_stem(template: &str) -> String {
+    let kit = template.rsplit('/').next().unwrap_or(template);
+    let mapped: String = kit
+        .chars()
+        .map(|c| c.to_ascii_lowercase())
+        .map(|c| {
+            if c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' {
+                c
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    let stem: String = mapped
+        .trim_start_matches(|c: char| !c.is_ascii_lowercase())
+        .chars()
+        .take(SESSION_NAME_MAX - SESSION_SUFFIX_LEN)
+        .collect();
+    match stem.trim_end_matches('-') {
+        "" => "kit".to_string(),
+        stem => stem.to_string(),
+    }
+}
+
+/// `{stem}-{6 random hex}`, drawing another ending while `taken` says tmux has the name.
+fn pick_session_name(
+    template: &str,
+    mut random: impl FnMut() -> Result<[u8; 3]>,
+    taken: impl Fn(&str) -> bool,
+) -> Result<String> {
+    let stem = session_stem(template);
+    for _ in 0..8 {
+        let [a, b, c] = random()?;
+        let name = format!("{stem}-{a:02x}{b:02x}{c:02x}");
+        if !taken(&name) {
+            return Ok(name);
+        }
+    }
+    anyhow::bail!("couldn't find a free session name for '{template}'; pass one with --name")
+}
+
+fn random_bytes() -> Result<[u8; 3]> {
+    use std::io::Read;
+    let mut bytes = [0u8; 3];
+    std::fs::File::open("/dev/urandom")
+        .and_then(|mut f| f.read_exact(&mut bytes))
+        .context("failed to read /dev/urandom for a session name")?;
+    Ok(bytes)
+}
+
+/// The session name: `--name` checked against the rule and tmux, or a generated one.
+fn resolve_session_name(name: Option<&str>, template: &str) -> Result<String> {
+    use nemonik_core::tmux::tmux_has_session_blocking;
+    match name {
+        Some(name) => {
+            check_session_name(name)?;
+            if tmux_has_session_blocking(name) {
+                anyhow::bail!(
+                    "session name '{name}' is taken: tmux already has a session by that name"
+                );
+            }
+            Ok(name.to_string())
+        }
+        None => pick_session_name(template, random_bytes, tmux_has_session_blocking),
+    }
 }
 
 /// TOML basic-string escaping for Codex `-c` values (Rust's `Debug` escaping isn't valid TOML).
@@ -412,8 +491,11 @@ pub async fn run(
         yolo,
         remote,
         yes,
+        name,
     } = flags;
     validate_remote(remote, project)?;
+    // Before anything is fetched or written, so a bad or taken `--name` leaves nothing.
+    let session = resolve_session_name(name.as_deref(), template)?;
     // Fail before creating a session if `--new` has no configured command.
     if new {
         nemonik_core::config::require_new_window_command()?;
@@ -441,8 +523,6 @@ pub async fn run(
     for warning in &launch.warnings {
         eprintln!("nemonik: {warning}");
     }
-    // One session name for both the skills base and the spec.
-    let session = session_name(project, template)?;
     let (args, env) = finish_argv(&launch, &session)?;
     let spec = nemonik_core::launchspec::LaunchSpec {
         program: agent_binary(&launch.agent).to_string(),
@@ -514,12 +594,48 @@ mod tests {
         assert!(validate_remote(true, None).is_err());
     }
 
+    fn generated(template: &str) -> String {
+        pick_session_name(template, || Ok([0x3f, 0x9a, 0x2c]), |_| false).unwrap()
+    }
+
     #[test]
-    fn session_name_is_unique_per_call() {
-        assert_ne!(
-            session_name(Some("proj"), "tmpl").unwrap(),
-            session_name(Some("proj"), "tmpl").unwrap()
-        );
+    fn generated_session_names_are_category_name_and_six_hex() {
+        assert_eq!(generated("mitchldtn/sdd:plan"), "sdd-plan-3f9a2c");
+        assert_eq!(generated("mine"), "mine-3f9a2c");
+    }
+
+    #[test]
+    fn generated_session_names_follow_the_session_name_rule() {
+        for template in [
+            "mitchldtn/a-very-long-category-name:and-an-even-longer-kit-name",
+            "Owner/My.Kit:Plan V2",
+            "9lives",
+            "--",
+            "ünïcode",
+        ] {
+            let name = generated(template);
+            check_session_name(&name).unwrap_or_else(|e| panic!("{template} -> {name}: {e}"));
+            assert!(name.ends_with("-3f9a2c"), "{name}");
+        }
+        assert_eq!(generated("Owner/My.Kit:Plan V2"), "my-kit-plan-v2-3f9a2c");
+    }
+
+    #[test]
+    fn pick_session_name_skips_a_name_tmux_already_has() {
+        let mut draws = [[0, 0, 1], [0, 0, 2]].into_iter();
+        let name = pick_session_name("o/c:n", || Ok(draws.next().unwrap()), |n| n == "c-n-000001")
+            .unwrap();
+        assert_eq!(name, "c-n-000002");
+    }
+
+    #[test]
+    fn check_session_name_rejects_names_outside_the_rule() {
+        for bad in ["", "Review", "review.128", "1review", "-r", &"r".repeat(33)] {
+            let err = check_session_name(bad).unwrap_err().to_string();
+            assert!(err.contains("32 characters"), "{bad}: {err}");
+        }
+        check_session_name(&"r".repeat(32)).unwrap();
+        check_session_name("review_128-x").unwrap();
     }
 
     fn bundle_with_content(content: &str) -> KitBundle {

@@ -41,10 +41,14 @@ enum Command {
         /// Full kit name (`owner/category:name`, e.g. `mitchldtn/code:review`), or a
         /// kit alias or local kit name from `nemonik.json`.
         kit: String,
-        /// Project for `--remote` access and the session name. Defaults to
-        /// `$NEMONIK_PROJECT`, then `nemonik.json`.
+        /// Project for `--remote` access. Defaults to `$NEMONIK_PROJECT`, then
+        /// `nemonik.json`.
         #[arg(long)]
         project: Option<String>,
+        /// Session name instead of a generated one: 1 to 32 characters, a lowercase
+        /// letter first, then lowercase letters, digits, `_` or `-`.
+        #[arg(long)]
+        name: Option<String>,
         /// Agent to launch.
         #[arg(long, default_value = "claude")]
         agent: launch::Agent,
@@ -162,7 +166,7 @@ fn expand_kit_alias(kit: String) -> anyhow::Result<String> {
 }
 
 /// Resolves the effective project and expands an alias for `run`. The project only
-/// scopes `--remote` and names the session.
+/// scopes `--remote`.
 fn apply_project_config(
     flag_project: Option<String>,
     kit: String,
@@ -254,6 +258,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Run {
             kit,
             project,
+            name,
             agent,
             no_attach,
             new,
@@ -277,6 +282,7 @@ async fn main() -> anyhow::Result<()> {
                     yolo,
                     remote,
                     yes,
+                    name,
                 },
                 prompt.as_deref(),
                 trust.as_deref(),
