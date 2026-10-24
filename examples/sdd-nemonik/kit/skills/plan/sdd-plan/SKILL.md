@@ -206,7 +206,7 @@ capture what "working" means.
 | Requirement (capability) | Change | Covered by | Level |
 |---|---|---|---|
 | <Name> (<capability>) | ADDED | S1 | A |
-| <Name> (<capability>) | MODIFIED | test: <test name> | A |
+| <Name> (<capability>) | MODIFIED | build's tests | A |
 
 ## Scenarios
 
@@ -228,8 +228,8 @@ capture what "working" means.
 (build fills this in)
 ```
 
-Every ADDED or MODIFIED requirement has a Coverage row, covered by a scenario or a named test; one
-scenario or test may cover several requirements.
+Every ADDED or MODIFIED requirement has a Coverage row, covered by a scenario, or by "build's tests"
+for logic a scenario can't reach; one scenario may cover several requirements.
 
 ### 6.5 `<id>-holdouts` (tiers M and L)
 
@@ -247,11 +247,9 @@ Tell the human they may add their own before approving.
 ```
 
 - Order groups by dependency. Each task is small enough for one sitting.
-- Each task's Verify is a command or an observable result. Name a test in it only for new logic.
-  Tests call the code's functions directly. They don't run the program the way a user does (a CLI
-  command, an HTTP request, a page in a browser) and check what comes back: scenarios do that
-  against the real program. Never name a test for what can't break (a field passed through, a
-  constant, frozen data), what only checks a mock, or a case another test covers.
+- Each task's Verify is a command run against the program or an observable result, never a test
+  name, test file or test function: which tests to write is build's call. Put the behavior to check,
+  edge cases included, in the task itself.
 - No task runs the full suite, and no task runs the scenarios: build does both once, in local
   verification.
 - Each group carries the docs its own work needs.
@@ -263,6 +261,7 @@ Tell the human they may add their own before approving.
 - Every requirement has a SHALL or MUST and at least one `####` scenario with WHEN and THEN.
 - Every MODIFIED, REMOVED or RENAMED name matches an existing living requirement exactly.
 - Every ADDED or MODIFIED requirement is in the coverage table (tiers M and L).
+- No task names a test, a test file or a test function.
 - No placeholders, no `TBD`, no vague acceptance criteria. Each acceptance criterion has a scenario
   or task that proves it; each scenario can be run against the program as the tasks leave it.
 - Tiers M and L: `## Based on` names real sources.

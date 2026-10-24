@@ -92,7 +92,7 @@ about locally.
 
 - Where a test is warranted, prefer a law or property over a list of examples: round trips,
   identity, idempotence, invariants kept across an operation.
-- Test behavior through the public surface, not internal calls.
+- Test a function through its inputs and outputs, not its internals.
 - Mock only at I/O boundaries.
 - Refactor by substituting equals for equals.
 - Keep public interfaces stable unless the change requires otherwise.
