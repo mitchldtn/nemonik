@@ -38,14 +38,14 @@ get(type="context", project="my-app", slug="architecture")
 get(type="context", project="my-app", ticket="DEV-52")
 ```
 
-With a `slug`, `version=N` returns version N in the same shape: its body, title and type as they were.
+With a `slug`, `version=N` returns version N in the same shape: its body as written, and its title and type as they were when the next body change replaced it (title and type changes alone aren't versioned).
 
-`history=true` lists the doc's versions newest first, without bodies: `version`, `title`, `type`, `author` (an email) and `created_at`. `limit` sets how many come back (1 to 250, default 25); `before=N` returns only versions below N, so pass the last `version` you got to read the next page. `author` and `created_at` are null where nemonik's server has no record of the write, such as for version 1.
+`history=true` lists the doc's versions newest first, without bodies: `version`, `title`, `type`, `author` (an email) and `created_at`. `limit` sets how many come back (1 to 250, default 25). When older versions remain, the result has `next_cursor`: pass it back as `cursor` to get the next page. It is absent on the last page. Treat it as an opaque string. `author` and `created_at` are null where nemonik's server has no record of the write, such as for version 1.
 
 ```mcp title="MCP"
 get(type="context", project="my-app", slug="status", version=12)
 get(type="context", project="my-app", slug="status", history=true)
-get(type="context", project="my-app", slug="status", history=true, limit=25, before=31)
+get(type="context", project="my-app", slug="status", history=true, cursor="<next_cursor>")
 ```
 
 ## search
