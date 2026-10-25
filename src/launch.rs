@@ -524,9 +524,14 @@ pub async fn run(
     }
     let (args, mut env) = finish_argv(&launch, &session)?;
     if herdr {
-        // What a `nemonik run` inside the session needs to open its own herdr tab; never
-        // the pane id, which would point herdr's hooks at this pane.
-        for key in ["HERDR_ENV", "HERDR_BIN_PATH", "HERDR_SOCKET_PATH"] {
+        // What a `nemonik run` inside the session needs to open its own herdr tab in this
+        // pane's workspace; never the pane id, which would point herdr's hooks at this pane.
+        for key in [
+            "HERDR_ENV",
+            "HERDR_BIN_PATH",
+            "HERDR_SOCKET_PATH",
+            "HERDR_WORKSPACE_ID",
+        ] {
             if let Ok(value) = std::env::var(key) {
                 env.insert(key.to_string(), value);
             }
