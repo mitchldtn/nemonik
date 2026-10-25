@@ -24,7 +24,7 @@ $ herdr agent wait review-128 --until idle
 ## Workspaces and worktrees
 
 - Open one herdr workspace per project folder: `herdr workspace create --cwd <folder>`, or new in the sidebar. `nk run` there finds the folder's `nemonik.json`, so its sessions use that project and its aliases.
-- `nk run --new` and `--no-attach` open their tab in the workspace of the pane they run in, even when another workspace is focused.
+- `nk run --new` and `--no-attach` open their tab in your current workspace. An agent's kits open in the workspace its session was started in.
 - `herdr worktree create --branch <name>` opens a Git worktree as its own workspace, grouped under the repository's workspace. The checkout has `nemonik.json` only if it is committed. `herdr worktree remove` removes the checkout and keeps the branch.
 - Closing a workspace closes its tabs. Its nemonik sessions keep running; reach them with `nk attach <session>`.
 
