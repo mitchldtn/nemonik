@@ -92,17 +92,23 @@ fn tab_pane_id(created: &str) -> Option<String> {
         .map(str::to_string)
 }
 
-/// Opens a tab labeled `label` in herdr's active workspace, running
+/// Opens a tab labeled `label` in the launching pane's workspace (`HERDR_WORKSPACE_ID`),
+/// or herdr's active workspace when that is unset, running
 /// `exec nemonik attach <session>`, so the tab closes when the attach ends.
 pub fn open_tab(session: &str, label: &str, focus: TabFocus) -> Result<()> {
     let focus = match focus {
         TabFocus::Focused => "--focus",
         TabFocus::Background => "--no-focus",
     };
-    let created = herdr()
-        .args(["tab", "create", "--label", label, focus])
-        .output()
-        .context("failed to run herdr")?;
+    let mut create = herdr();
+    create.args(["tab", "create", "--label", label, focus]);
+    if let Some(workspace) = std::env::var("HERDR_WORKSPACE_ID")
+        .ok()
+        .filter(|w| !w.is_empty())
+    {
+        create.args(["--workspace", &workspace]);
+    }
+    let created = create.output().context("failed to run herdr")?;
     let pane = tab_pane_id(&String::from_utf8_lossy(&created.stdout))
         .filter(|_| created.status.success())
         .ok_or_else(|| {
