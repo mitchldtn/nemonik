@@ -31,7 +31,7 @@ put(project="my-app", slug="status", mode="restore", version=12)
 
 ## get
 
-Every read returns the doc's current `version`. A write that changes the body raises it by 1; a write that changes only metadata doesn't.
+Every read returns the doc's current `version`. A write that changes the body, or any append, raises it by 1; a write that changes only metadata doesn't.
 
 ```mcp title="MCP"
 get(type="context", project="my-app", slug="architecture")
