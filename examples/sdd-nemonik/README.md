@@ -135,7 +135,6 @@ The formats are in `kit/skills/plan/sdd-plan/SKILL.md`.
 ## Limits
 
 - **Holdouts are written by the plan agent.** Add your own to `<id>-holdouts` before approving.
-- **The store keeps no history of a document.** A `put` replaces the body.
 - **Both reviews run with `--yolo`**, so the independent review runs your program without
   permission prompts.
 

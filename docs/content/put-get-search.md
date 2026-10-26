@@ -23,11 +23,29 @@ put(project="my-app", slug="dev-52-tasks", mode="edit", edits=[{"old_str": "- [ 
 put(project="my-app", slug="architecture", links=["..."])  # metadata only
 ```
 
+`mode="restore"` makes an earlier version's body the doc's next version, byte for byte; the title, type and links stay. It takes only `slug` and `version`. Restoring a body equal to the current one changes nothing. Like every `put`, it needs editor rank on the project.
+
+```mcp title="MCP"
+put(project="my-app", slug="status", mode="restore", version=12)
+```
+
 ## get
+
+Every read returns the doc's current `version`. A write that changes the body, or any append, raises it by 1; a write that changes only metadata doesn't.
 
 ```mcp title="MCP"
 get(type="context", project="my-app", slug="architecture")
 get(type="context", project="my-app", ticket="DEV-52")
+```
+
+With a `slug`, `version=N` returns version N in the same shape: its body as written, and its title and type as they were when the next body change replaced it (title and type changes alone aren't versioned).
+
+`history=true` lists the doc's versions newest first, without bodies: `version`, `title`, `type`, `author` (an email) and `created_at`. `limit` sets how many come back (1 to 250, default 25). When older versions remain, the result has `next_cursor`: pass it back as `cursor` to get the next page. It is absent on the last page. Treat it as an opaque string. `author` and `created_at` are null where nemonik's server has no record of the write, such as for version 1.
+
+```mcp title="MCP"
+get(type="context", project="my-app", slug="status", version=12)
+get(type="context", project="my-app", slug="status", history=true)
+get(type="context", project="my-app", slug="status", history=true, cursor="<next_cursor>")
 ```
 
 ## search
