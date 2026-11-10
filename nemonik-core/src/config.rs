@@ -85,6 +85,8 @@ struct Config {
     new_window_command: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     herdr: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    orca: Option<bool>,
 }
 
 fn config_path() -> Result<PathBuf> {
@@ -144,12 +146,44 @@ pub fn require_new_window_command() -> Result<String> {
     })
 }
 
-/// herdr sets `HERDR_ENV=1` in its panes. The file is read only inside herdr.
-pub fn herdr_active() -> Result<bool> {
-    if std::env::var("HERDR_ENV").ok().as_deref() != Some("1") {
-        return Ok(false);
+/// The terminal host whose behavior a command takes on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Host {
+    Plain,
+    Herdr,
+    Orca,
+}
+
+/// The innermost host, so a herdr pane inside an Orca tab is herdr's; `Plain` when its
+/// key in `config.json` is `false`. herdr sets `HERDR_ENV=1` in its panes; Orca sets
+/// `TERM_PROGRAM=Orca`, and a session started inside Orca carries `ORCA_WORKTREE_ID`
+/// (its `TERM_PROGRAM` is tmux's). `config` is read only inside a host.
+fn host_from(
+    env: impl Fn(&str) -> Option<String>,
+    config: impl FnOnce() -> Result<Config>,
+) -> Result<Host> {
+    if env("HERDR_ENV").as_deref() == Some("1") {
+        return Ok(match config()?.herdr {
+            Some(false) => Host::Plain,
+            _ => Host::Herdr,
+        });
     }
-    Ok(read_config_at(&config_path()?)?.herdr != Some(false))
+    let in_orca = env("TERM_PROGRAM").as_deref() == Some("Orca")
+        || env("ORCA_WORKTREE_ID").is_some_and(|id| !id.is_empty());
+    if in_orca {
+        return Ok(match config()?.orca {
+            Some(false) => Host::Plain,
+            _ => Host::Orca,
+        });
+    }
+    Ok(Host::Plain)
+}
+
+pub fn terminal_host() -> Result<Host> {
+    host_from(
+        |key| std::env::var(key).ok(),
+        || read_config_at(&config_path()?),
+    )
 }
 
 // Trust policy: `--trust` > NEMONIK_TRUST > `config.json` > `strict`. Never read
@@ -251,12 +285,59 @@ mod tests {
     }
 
     #[test]
-    fn read_config_at_rejects_a_non_boolean_herdr_naming_the_file() {
+    fn read_config_at_rejects_a_non_boolean_herdr_or_orca_naming_the_file() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.json");
-        std::fs::write(&path, r#"{"herdr": "yes"}"#).unwrap();
-        let err = format!("{:#}", read_config_at(&path).unwrap_err());
-        assert!(err.contains("config.json"), "{err}");
+        for raw in [r#"{"herdr": "yes"}"#, r#"{"orca": "yes"}"#] {
+            std::fs::write(&path, raw).unwrap();
+            let err = format!("{:#}", read_config_at(&path).unwrap_err());
+            assert!(err.contains("config.json"), "{err}");
+        }
+    }
+
+    fn host_with(vars: &[(&str, &str)], config: Config) -> Host {
+        let env = |key: &str| {
+            vars.iter()
+                .find(|(k, _)| *k == key)
+                .map(|(_, v)| v.to_string())
+        };
+        host_from(env, || Ok(config)).unwrap()
+    }
+
+    #[test]
+    fn host_from_picks_the_innermost_host_unless_its_key_is_false() {
+        let off = |herdr, orca| Config {
+            herdr,
+            orca,
+            ..Config::default()
+        };
+        let herdr_in_orca = [("HERDR_ENV", "1"), ("TERM_PROGRAM", "Orca")];
+        assert_eq!(host_with(&herdr_in_orca, Config::default()), Host::Herdr);
+        assert_eq!(
+            host_with(&herdr_in_orca, off(Some(false), None)),
+            Host::Plain
+        );
+        assert_eq!(
+            host_with(&[("TERM_PROGRAM", "Orca")], Config::default()),
+            Host::Orca
+        );
+        assert_eq!(
+            host_with(&[("TERM_PROGRAM", "Orca")], off(None, Some(false))),
+            Host::Plain
+        );
+        // Inside a session started in Orca, `TERM_PROGRAM` is tmux's.
+        let in_session = [("TERM_PROGRAM", "tmux"), ("ORCA_WORKTREE_ID", "r::/p")];
+        assert_eq!(host_with(&in_session, Config::default()), Host::Orca);
+        assert_eq!(
+            host_with(&[("TERM_PROGRAM", "iTerm.app")], Config::default()),
+            Host::Plain
+        );
+    }
+
+    #[test]
+    fn host_from_reads_no_config_outside_a_host() {
+        let unreadable = || anyhow::bail!("config read outside a host");
+        assert_eq!(host_from(|_| None, unreadable).unwrap(), Host::Plain);
     }
 
     #[test]
