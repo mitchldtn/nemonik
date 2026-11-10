@@ -55,12 +55,12 @@ enum Command {
         #[arg(long, default_value = "claude")]
         agent: launch::Agent,
         /// Start the session in the background and print how to attach. In
-        /// herdr, also open it in a background herdr tab.
+        /// herdr or Orca, also open it in a background herdr tab or Orca terminal.
         #[arg(long)]
         no_attach: bool,
         /// Open the session in a new terminal window, using `new_window_command`
-        /// from ~/.nemonik/config.json. In herdr, open it in a new herdr tab
-        /// instead.
+        /// from ~/.nemonik/config.json. In herdr or Orca, open it in a new herdr
+        /// tab or Orca terminal instead.
         #[arg(long)]
         new: bool,
         /// Skip the agent's own permission prompts.

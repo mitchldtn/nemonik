@@ -9,7 +9,7 @@ Commands for the tmux sessions `nk run` creates.
 
 | Command | What it does |
 |---|---|
-| `nk attach <session>` | Attach to a session you detached from, or one started with `--no-attach` or `--new`. In a herdr pane, herdr also shows the session's agent ([Use with herdr](/herdr/)). |
+| `nk attach <session>` | Attach to a session you detached from, or one started with `--no-attach` or `--new`. In a herdr pane, herdr also shows the session's agent ([Use with herdr](/herdr/)). In Orca, the status stays on the terminal the session first showed in ([Use with Orca](/orca/)). |
 | `nk write <session> <text>` | Paste text into the session and submit it. |
 | `nk read <session>` | Print the session's current screen. `--lines N` adds scrollback. |
 
