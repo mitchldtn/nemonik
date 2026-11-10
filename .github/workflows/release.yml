@@ -120,7 +120,7 @@ jobs:
 
   build-sign-notarize-macos:
     needs: preflight
-    runs-on: macos-14
+    runs-on: macos-latest
     environment: production
     steps:
       - name: Checkout code
