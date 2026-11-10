@@ -49,8 +49,8 @@ nk run sdd:plan -- add recurring tasks
 
 1. Plan reads `sdd/project.md`, your specs and memory, explores the code, and asks you questions one
    at a time. It writes `sdd/changes/add-recurring-tasks/` and asks you to review it.
-2. Reply `approved`. Plan launches build, then closes itself. In herdr, build opens in a new herdr
-   tab. Elsewhere it opens in a new window, which needs `new_window_command`
+2. Reply `approved`. Plan launches build, then closes itself. In herdr or Orca, build opens in a new
+   herdr tab or Orca terminal. Elsewhere it opens in a new window, which needs `new_window_command`
    ([window commands](https://docs.nemonik.io/config/#window-commands)); without it, build takes
    over your window.
 3. Build works through the tasks, committing on the change branch, and verifies the change

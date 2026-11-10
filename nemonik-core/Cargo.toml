@@ -21,6 +21,7 @@ serde_json.workspace = true
 sha2.workspace = true
 tar.workspace = true
 tokio.workspace = true
+toml_edit.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

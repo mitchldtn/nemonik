@@ -25,8 +25,8 @@ nk run [OPTIONS] <KIT> [PROMPT]...
 | `--project` | Project for `--remote` access. Defaults to `$NEMONIK_PROJECT`, then `nemonik.json`. |
 | `--name` | Session name instead of a generated one: 1 to 32 characters, a lowercase letter first, then lowercase letters, digits, `_` or `-`. A name tmux already has is an error. |
 | `--agent` | `claude` (default) or `codex`. |
-| `--no-attach` | Start the session in the background and print how to attach. In herdr, also open it in a background herdr tab. |
-| `--new` | Open the session in a new terminal window, using `new_window_command` from [config.json](/config/). In herdr, open it in a new herdr tab instead ([Use with herdr](/herdr/)). |
+| `--no-attach` | Start the session in the background and print how to attach. In herdr or Orca, also open it in a background herdr tab or Orca terminal. |
+| `--new` | Open the session in a new terminal window, using `new_window_command` from [config.json](/config/). In herdr or Orca, open it in a new herdr tab or Orca terminal instead ([Use with herdr](/herdr/), [Use with Orca](/orca/)). |
 | `--remote` | Let your account write to or watch the session from another device. Needs `--project`. |
 | `--yes` | Start a new or changed kit without review and without pinning, for this run only. |
 | `--trust` | `strict` or `off` for this run only. |
@@ -64,5 +64,5 @@ On Codex, hooks aren't applied yet, `mcp_mode: only` can't be enforced, and an h
 :::
 
 :::note
-On Codex, a kit with skills gets its own `CODEX_HOME` under `~/.nemonik/sessions/<session>/`. It links `auth.json` and `skills/.system` from your Codex home (`$CODEX_HOME`, else `~/.codex`) and copies `config.toml`. A kit started from inside such a session links the same files and copies that session's `config.toml`. If Codex keeps your login in the keyring (`cli_auth_credentials_store` set to `keyring` or `auto`), the session starts logged out; use the default, `file`. Nothing else from it is carried in, such as `AGENTS.md`, and the session doesn't appear in `codex resume`.
+On Codex, a kit with skills gets its own `CODEX_HOME` under `~/.nemonik/sessions/<session>/`. It links `auth.json` and `skills/.system` from your Codex home (`$CODEX_HOME`, else `~/.codex`) and copies `config.toml` and `hooks.json`, so hooks you trusted there stay trusted. A kit started from inside such a session links the same files and copies that session's `config.toml` and `hooks.json`. A Codex kit without skills uses your Codex home; started from inside a session with its own `CODEX_HOME`, it uses the home that one was made from. If Codex keeps your login in the keyring (`cli_auth_credentials_store` set to `keyring` or `auto`), the session starts logged out; use the default, `file`. Nothing else from it is carried in, such as `AGENTS.md`, and the session doesn't appear in `codex resume`.
 :::

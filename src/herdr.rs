@@ -1,6 +1,7 @@
 //! What nemonik tells herdr from inside a herdr pane: the pane's resume command, the
 //! agent's name, and new tabs for sessions.
 
+use crate::session::TabFocus;
 use anyhow::{Context, Result};
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -77,11 +78,6 @@ pub fn report_session(session: &str, agent: &'static str) {
             std::thread::sleep(RETRY_INTERVAL);
         }
     });
-}
-
-pub enum TabFocus {
-    Focused,
-    Background,
 }
 
 fn tab_pane_id(created: &str) -> Option<String> {

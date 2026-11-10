@@ -2,6 +2,7 @@
 
 use anyhow::{Context, Result};
 use clap::ValueEnum;
+use nemonik_core::config::Host;
 use nemonik_core::mcp::{HookSpec, KitBundle, McpKind, McpMode, McpSpec, SkillSpec};
 use nemonik_core::skills::SkillLayout;
 use std::collections::BTreeMap;
@@ -23,7 +24,7 @@ pub enum Agent {
 pub struct RunFlags {
     /// Don't attach to the session; print how to, and return.
     pub no_attach: bool,
-    /// Open the session in a new terminal window via `new_window_command` in `~/.nemonik/config.json`, or a herdr tab in herdr.
+    /// Open the session in a new terminal window via `new_window_command` in `~/.nemonik/config.json`, or a herdr tab or Orca terminal in those hosts.
     pub new: bool,
     /// Skip the agent's own permission/approval prompts entirely.
     pub yolo: bool,
@@ -493,10 +494,10 @@ pub async fn run(
     validate_remote(remote, project)?;
     // Before anything is fetched or written, so a bad or taken `--name` leaves nothing.
     let session = resolve_session_name(name.as_deref(), template)?;
-    let herdr = nemonik_core::config::herdr_active()?;
+    let host = nemonik_core::config::terminal_host()?;
     // Fail before creating a session if `--new` has no configured command; inside herdr
-    // it opens a herdr tab instead.
-    if new && !herdr {
+    // or Orca it opens a tab of that host instead.
+    if new && host == Host::Plain {
         nemonik_core::config::require_new_window_command()?;
     }
 
@@ -522,20 +523,49 @@ pub async fn run(
     for warning in &launch.warnings {
         eprintln!("nemonik: {warning}");
     }
-    let (args, mut env) = finish_argv(&launch, &session)?;
-    if herdr {
-        // What a `nemonik run` inside the session needs to open its own herdr tab in this
-        // pane's workspace; never the pane id, which would point herdr's hooks at this pane.
-        for key in [
-            "HERDR_ENV",
-            "HERDR_BIN_PATH",
-            "HERDR_SOCKET_PATH",
-            "HERDR_WORKSPACE_ID",
-        ] {
-            if let Ok(value) = std::env::var(key) {
-                env.insert(key.to_string(), value);
+    let (mut args, mut env) = finish_argv(&launch, &session)?;
+    // The launching shell's Codex home (an Orca managed account sets it), unless the
+    // session has its own.
+    if let Some(home) = nemonik_core::skills::launching_codex_home()? {
+        // Fail closed on a non-UTF-8 path rather than point Codex at the wrong home.
+        let home = home.to_str().ok_or_else(|| {
+            anyhow::anyhow!("codex home path is not valid UTF-8: {}", home.display())
+        })?;
+        env.entry("CODEX_HOME".to_string())
+            .or_insert_with(|| home.to_string());
+    }
+    match host {
+        Host::Herdr => {
+            // What a `nemonik run` inside the session needs to open its own herdr tab in
+            // this pane's workspace; never the pane id, which would point herdr's hooks at
+            // this pane.
+            for key in [
+                "HERDR_ENV",
+                "HERDR_BIN_PATH",
+                "HERDR_SOCKET_PATH",
+                "HERDR_WORKSPACE_ID",
+            ] {
+                if let Ok(value) = std::env::var(key) {
+                    env.insert(key.to_string(), value);
+                }
             }
         }
+        Host::Orca => {
+            // Orca's status hooks and a nested `nemonik run` need these. The pane identity
+            // only when the session attaches in this pane; a new terminal adds its own.
+            let attach = if new || no_attach {
+                crate::orca::Attach::Elsewhere
+            } else {
+                crate::orca::Attach::Here
+            };
+            env.extend(crate::orca::forwarded_env(std::env::vars(), attach));
+            // Codex's shared app-server would run its hooks with the environment of the
+            // Codex that started it; Orca's own `codex` wrapper adds this too.
+            if launch.agent == Agent::Codex {
+                args.insert(0, "--no-daemon".to_string());
+            }
+        }
+        Host::Plain => {}
     }
     let spec = nemonik_core::launchspec::LaunchSpec {
         program: agent_binary(&launch.agent).to_string(),
@@ -548,7 +578,7 @@ pub async fn run(
     };
     // `validate_remote` guarantees a project when `--remote`.
     let remote_project = if remote { project } else { None };
-    crate::session::launch(&spec, no_attach, new, remote_project, herdr)
+    crate::session::launch(spec, no_attach, new, remote_project, host)
 }
 
 /// The agent's argv and env for `plan`: the options, this session's skills (Claude

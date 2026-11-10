@@ -38,6 +38,27 @@ pub fn codex_home_dir(session: &str) -> Result<PathBuf> {
     Ok(session_base(session)?.join("codex-home"))
 }
 
+/// The Codex home a session started from a shell with `CODEX_HOME=home` should use.
+/// A nemonik session home is removed when its session ends, so it passes on the home it
+/// was seeded from, where its `auth.json` link points; `None` (Codex's default) without
+/// that link.
+fn codex_home_to_pass_on(home: &Path, sessions: &Path) -> Option<PathBuf> {
+    let resolved = |p: &Path| std::fs::canonicalize(p).unwrap_or(p.to_path_buf());
+    if !resolved(home).starts_with(resolved(sessions)) {
+        return Some(home.to_path_buf());
+    }
+    let auth = std::fs::read_link(home.join("auth.json")).ok()?;
+    auth.parent().map(Path::to_path_buf)
+}
+
+/// The launching shell's `CODEX_HOME` to put in a session's spec, when it has one.
+pub fn launching_codex_home() -> Result<Option<PathBuf>> {
+    let Some(home) = std::env::var_os("CODEX_HOME") else {
+        return Ok(None);
+    };
+    Ok(codex_home_to_pass_on(Path::new(&home), &sessions_dir()?))
+}
+
 fn real_codex_home() -> Result<PathBuf> {
     if let Some(dir) = std::env::var_os("CODEX_HOME") {
         return Ok(PathBuf::from(dir));
@@ -45,10 +66,39 @@ fn real_codex_home() -> Result<PathBuf> {
     Ok(crate::auth::home_dir()?.join(".codex"))
 }
 
+/// `config` with every hook trusted under `<from>/hooks.json` also trusted under
+/// `<to>/hooks.json`. Codex keys a hook's trust by its file's path and the hook's hash,
+/// so a copied `hooks.json` is trusted only under its new path; Codex still checks each
+/// hash.
+fn with_hook_trust_moved(config: &str, from: &Path, to: &Path) -> Result<String> {
+    let mut doc: toml_edit::DocumentMut = config.parse()?;
+    let Some(state) = doc
+        .get_mut("hooks")
+        .and_then(|hooks| hooks.get_mut("state"))
+        .and_then(|state| state.as_table_like_mut())
+    else {
+        return Ok(config.to_string());
+    };
+    let from = format!("{}/hooks.json:", from.display());
+    let to = format!("{}/hooks.json:", to.display());
+    let moved: Vec<_> = state
+        .iter()
+        .filter_map(|(key, entry)| {
+            let hook = key.strip_prefix(&from)?;
+            Some((format!("{to}{hook}"), entry.clone()))
+        })
+        .collect();
+    for (key, entry) in moved {
+        state.insert(&key, entry);
+    }
+    Ok(doc.to_string())
+}
+
 // Seeds a per-session Codex home: `auth.json` and `skills/.system` are symlinked
-// (token refreshes write through), `config.toml` is copied so session edits never
-// reach the real config. Links point at the fully resolved file: a launch from inside
-// a Codex session inherits that session's `CODEX_HOME`, which is removed when it ends.
+// (token refreshes write through), `config.toml` and `hooks.json` are copied so session
+// edits never reach the real ones. Links point at the fully resolved file: a launch from
+// inside a Codex session inherits that session's `CODEX_HOME`, which is removed when it
+// ends.
 fn seed_codex_home(real: &Path, dest: &Path) -> Result<()> {
     std::fs::create_dir_all(dest.join("skills"))
         .with_context(|| format!("failed to create codex home '{}'", dest.display()))?;
@@ -66,16 +116,29 @@ fn seed_codex_home(real: &Path, dest: &Path) -> Result<()> {
     };
     symlink_in("auth.json", dest.join("auth.json"))?;
     symlink_in("skills/.system", dest.join("skills").join(".system"))?;
-    let config_src = real.join("config.toml");
-    if config_src.exists() {
-        let config_dest = dest.join("config.toml");
-        let _ = std::fs::remove_file(&config_dest);
-        std::fs::copy(&config_src, &config_dest).with_context(|| {
-            format!(
-                "failed to copy codex config.toml into '{}'",
-                config_dest.display()
-            )
-        })?;
+    let copy_in = |rel: &str| -> Result<()> {
+        let src = real.join(rel);
+        if !src.exists() {
+            return Ok(());
+        }
+        let target = dest.join(rel);
+        let _ = std::fs::remove_file(&target);
+        std::fs::copy(&src, &target)
+            .map(|_| ())
+            .with_context(|| format!("failed to copy codex {rel} into '{}'", target.display()))
+    };
+    copy_in("config.toml")?;
+    copy_in("hooks.json")?;
+    let config_dest = dest.join("config.toml");
+    if dest.join("hooks.json").exists() && config_dest.exists() {
+        // Codex names a home by its resolved path.
+        let resolved = |home: &Path| std::fs::canonicalize(home).unwrap_or(home.to_path_buf());
+        let config = std::fs::read_to_string(&config_dest)
+            .with_context(|| format!("failed to read '{}'", config_dest.display()))?;
+        let config = with_hook_trust_moved(&config, &resolved(real), &resolved(dest))
+            .with_context(|| format!("failed to parse '{}'", real.join("config.toml").display()))?;
+        std::fs::write(&config_dest, config)
+            .with_context(|| format!("failed to write '{}'", config_dest.display()))?;
     }
     Ok(())
 }
@@ -332,8 +395,80 @@ mod tests {
 
         assert!(dest.path().join("auth.json").exists());
         assert!(!dest.path().join("config.toml").exists());
+        assert!(!dest.path().join("hooks.json").exists());
         assert!(!dest.path().join("skills/.system").exists());
         assert!(dest.path().join("skills").is_dir());
+    }
+
+    #[test]
+    fn codex_home_to_pass_on_is_the_origin_of_a_session_home() {
+        let real = TempDir::new().unwrap();
+        let sessions = TempDir::new().unwrap();
+        std::fs::write(real.path().join("auth.json"), "tok").unwrap();
+        let parent = sessions.path().join("parent/codex-home");
+        seed_codex_home(real.path(), &parent).unwrap();
+        let child = sessions.path().join("child/codex-home");
+        seed_codex_home(&parent, &child).unwrap();
+        let origin = std::fs::canonicalize(real.path()).unwrap();
+
+        for home in [&parent, &child] {
+            assert_eq!(
+                codex_home_to_pass_on(home, sessions.path()),
+                Some(origin.clone())
+            );
+        }
+        assert_eq!(
+            codex_home_to_pass_on(real.path(), sessions.path()),
+            Some(real.path().to_path_buf())
+        );
+        let keyring_login = sessions.path().join("k/codex-home");
+        std::fs::create_dir_all(&keyring_login).unwrap();
+        assert_eq!(codex_home_to_pass_on(&keyring_login, sessions.path()), None);
+    }
+
+    #[test]
+    fn seed_codex_home_copies_hooks_and_trusts_them_in_the_new_home_too() {
+        let real = TempDir::new().unwrap();
+        let dest = TempDir::new().unwrap();
+        let real_dir = std::fs::canonicalize(real.path()).unwrap();
+        let dest_dir = std::fs::canonicalize(dest.path()).unwrap();
+        let key = |home: &Path| format!("{}/hooks.json:stop:0:0", home.display());
+        std::fs::write(real.path().join("hooks.json"), "{\"hooks\":{}}").unwrap();
+        std::fs::write(
+            real.path().join("config.toml"),
+            format!(
+                "model = \"m\"\n\n[hooks.state.\"{}\"]\nenabled = true\ntrusted_hash = \"sha256:aa\"\n\n[hooks.state.\"/other/hooks.json:stop:0:0\"]\ntrusted_hash = \"sha256:bb\"\n",
+                key(&real_dir)
+            ),
+        )
+        .unwrap();
+
+        seed_codex_home(real.path(), dest.path()).unwrap();
+        seed_codex_home(real.path(), dest.path()).unwrap();
+
+        assert_eq!(
+            std::fs::read_to_string(dest.path().join("hooks.json")).unwrap(),
+            "{\"hooks\":{}}"
+        );
+        assert!(
+            !std::fs::symlink_metadata(dest.path().join("hooks.json"))
+                .unwrap()
+                .file_type()
+                .is_symlink()
+        );
+        let seeded: toml_edit::DocumentMut =
+            std::fs::read_to_string(dest.path().join("config.toml"))
+                .unwrap()
+                .parse()
+                .unwrap();
+        let state = seeded["hooks"]["state"].as_table_like().unwrap();
+        assert_eq!(state.len(), 3, "the copy is added once, the rest kept");
+        for home in [&real_dir, &dest_dir] {
+            let entry = state.get(&key(home)).unwrap();
+            assert_eq!(entry["trusted_hash"].as_str(), Some("sha256:aa"));
+            assert_eq!(entry["enabled"].as_bool(), Some(true));
+        }
+        assert_eq!(seeded["model"].as_str(), Some("m"));
     }
 
     #[test]

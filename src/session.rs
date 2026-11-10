@@ -2,6 +2,7 @@
 //! clean up, attach.
 
 use anyhow::{Context, Result};
+use nemonik_core::config::Host;
 use nemonik_core::launchspec::{
     LaunchSpec, consume_launch_spec, remove_launch_spec, write_launch_spec,
 };
@@ -156,8 +157,7 @@ fn tmux_spawn_error(e: std::io::Error) -> anyhow::Error {
     }
 }
 
-/// The tmux user option that records which agent a session runs.
-const AGENT_OPTION: &str = "@nemonik-agent";
+use nemonik_core::tmux::AGENT_OPTION;
 
 /// Best-effort: without the record, a later attach inside herdr sets no agent hint.
 fn record_agent(session: &str, agent: &str) {
@@ -236,7 +236,7 @@ pub fn attach(session: &str) -> Result<()> {
     if !tmux_has_session_blocking(session) {
         anyhow::bail!("no such session: {session}");
     }
-    let herdr_agent = if nemonik_core::config::herdr_active()? {
+    let herdr_agent = if nemonik_core::config::terminal_host()? == Host::Herdr {
         recorded_agent(session)
     } else {
         None
@@ -274,29 +274,37 @@ pub fn exec_agent(spec_path: &str) -> Result<()> {
     use std::os::unix::process::CommandExt;
     let mut cmd = Command::new(&spec.program);
     cmd.args(&spec.args);
-    // herdr's variables come only from the spec: the tmux server's environment can hold
-    // those of the herdr pane it was first started from, including a stale pane id.
+    // These come only from the spec: the tmux server's environment holds those of the
+    // shell it was first started from, such as another herdr pane's or Orca terminal's id.
     for (key, _) in std::env::vars_os() {
-        if key.to_string_lossy().starts_with("HERDR_") {
+        let key_str = key.to_string_lossy();
+        if key_str.starts_with("HERDR_") || key_str.starts_with("ORCA_") || key_str == "CODEX_HOME"
+        {
             cmd.env_remove(key);
         }
     }
-    // `CODEX_HOME` for a Codex launch with skills, herdr's variables inside herdr.
+    // `CODEX_HOME`, and herdr's or Orca's variables inside those hosts.
     cmd.envs(&spec.env);
     Err(cmd.exec()).with_context(|| format!("failed to exec agent process '{}'", spec.program))
 }
 
+#[derive(Clone, Copy)]
+pub enum TabFocus {
+    Focused,
+    Background,
+}
+
 /// Creates the session, then starts remote control, opens a window, or attaches. Skills
-/// must exist before `new-session`: Claude Code scans them at startup. Inside herdr
-/// (`herdr`), `--new` and `--no-attach` open a herdr tab instead.
+/// must exist before `new-session`: Claude Code scans them at startup. Inside herdr or
+/// Orca, `--new` and `--no-attach` open a tab of that host instead. An Orca terminal is
+/// created first, so the session starts with its identity.
 pub fn launch(
-    spec: &LaunchSpec,
+    mut spec: LaunchSpec,
     no_attach: bool,
     new: bool,
     remote_project: Option<&str>,
-    herdr: bool,
+    host: Host,
 ) -> Result<()> {
-    let name = spec.session.as_str();
     let exe = std::env::current_exe().context("failed to resolve nemonik's own executable path")?;
     let exe_str = exe
         .to_str()
@@ -304,16 +312,43 @@ pub fn launch(
 
     // Checked again here, after the trust review: writing and cleaning up the skills of a
     // name another session took meanwhile would delete that session's skills.
-    if tmux_has_session_blocking(name) {
-        anyhow::bail!("session name '{name}' is taken: tmux already has a session by that name");
+    if tmux_has_session_blocking(&spec.session) {
+        anyhow::bail!(
+            "session name '{}' is taken: tmux already has a session by that name",
+            spec.session
+        );
     }
-    let spec_path = write_launch_spec(spec)?;
-    // On failure, clean up the skills and spec: no session exists to fire the hook.
+    let focus = if new {
+        TabFocus::Focused
+    } else {
+        TabFocus::Background
+    };
+    let orca_terminal = match host {
+        Host::Orca if new || no_attach => {
+            let terminal = crate::orca::create_terminal(&spec.template, focus);
+            if let Ok(terminal) = &terminal {
+                spec.env.extend(terminal.identity());
+            }
+            Some(terminal)
+        }
+        _ => None,
+    };
+    let spec = &spec;
+    let name = spec.session.as_str();
+    let close_terminal = || {
+        if let Some(Ok(terminal)) = &orca_terminal {
+            crate::orca::close(terminal);
+        }
+    };
+    let spec_path = write_launch_spec(spec).inspect_err(|_| close_terminal())?;
+    // On failure, clean up the skills, spec and Orca terminal: no session exists to fire
+    // the hook or show in the terminal.
     let cleanup_partial = || {
         remove_launch_spec(name);
         if !spec.skills.is_empty() {
             let _ = nemonik_core::skills::cleanup(name);
         }
+        close_terminal();
     };
     let Some(spec_path) = spec_path.to_str() else {
         cleanup_partial();
@@ -352,19 +387,26 @@ pub fn launch(
     println!("Started detached session '{name}'.");
 
     if let Some(project) = remote_project {
-        crate::remote::spawn::daemon(project, name)?;
+        crate::remote::spawn::daemon(project, name).inspect_err(|_| close_terminal())?;
     }
 
-    if herdr && (new || no_attach) {
-        use crate::herdr::TabFocus;
-        let focus = if new {
-            TabFocus::Focused
-        } else {
-            TabFocus::Background
-        };
+    if host == Host::Herdr && (new || no_attach) {
         match crate::herdr::open_tab(name, &spec.template, focus) {
             Ok(()) if new => println!("Opened in a herdr tab."),
             Ok(()) => println!("Opened in a background herdr tab."),
+            Err(e) => eprintln!("nemonik: {e:#}"),
+        }
+        println!("Attach with: nemonik attach {name}");
+        return Ok(());
+    }
+    if let Some(terminal) = &orca_terminal {
+        match terminal
+            .as_ref()
+            .map_err(|e| anyhow::anyhow!("{e:#}"))
+            .and_then(|t| crate::orca::run_attach(t, name))
+        {
+            Ok(()) if new => println!("Opened in an Orca terminal."),
+            Ok(()) => println!("Opened in a background Orca terminal."),
             Err(e) => eprintln!("nemonik: {e:#}"),
         }
         println!("Attach with: nemonik attach {name}");
@@ -380,7 +422,7 @@ pub fn launch(
         return Ok(());
     }
     // The session exists, so an attach failure falls back to a hint, not an error.
-    match attach_or_switch(name, agent.filter(|_| herdr)) {
+    match attach_or_switch(name, agent.filter(|_| host == Host::Herdr)) {
         Ok(status) if status.success() => Ok(()),
         _ => {
             println!("Attach with: nemonik attach {name}");
@@ -422,8 +464,9 @@ mod tests {
             env: Default::default(),
             skills_layout: Default::default(),
         };
-        assert!(launch(&spec, true, false, None, false).is_err());
-        assert!(!nemonik_core::launchspec::launch_spec_path(&spec.session).exists());
+        let path = nemonik_core::launchspec::launch_spec_path(&spec.session);
+        assert!(launch(spec, true, false, None, Host::Plain).is_err());
+        assert!(!path.exists());
     }
 
     #[test]

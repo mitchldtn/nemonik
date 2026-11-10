@@ -11,6 +11,21 @@ pub fn exact_target(session: &str) -> String {
     format!("={session}:")
 }
 
+/// The tmux user option that records which agent a nemonik session runs.
+pub const AGENT_OPTION: &str = "@nemonik-agent";
+
+/// Whether this process runs inside a tmux session nemonik started (one with
+/// `AGENT_OPTION` set). Outside tmux, `show-options` would read another session.
+pub fn in_nemonik_session() -> bool {
+    if std::env::var_os("TMUX").is_none() {
+        return false;
+    }
+    Command::new("tmux")
+        .args(["show-options", "-qv", AGENT_OPTION])
+        .output()
+        .is_ok_and(|o| o.status.success() && !o.stdout.trim_ascii().is_empty())
+}
+
 /// Whether a session exists (`.output()` keeps tmux's error text off stderr).
 pub fn tmux_has_session_blocking(session: &str) -> bool {
     Command::new("tmux")

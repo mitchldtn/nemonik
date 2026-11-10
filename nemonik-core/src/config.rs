@@ -85,6 +85,8 @@ struct Config {
     new_window_command: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     herdr: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    orca: Option<bool>,
 }
 
 fn config_path() -> Result<PathBuf> {
@@ -144,12 +146,48 @@ pub fn require_new_window_command() -> Result<String> {
     })
 }
 
-/// herdr sets `HERDR_ENV=1` in its panes. The file is read only inside herdr.
-pub fn herdr_active() -> Result<bool> {
-    if std::env::var("HERDR_ENV").ok().as_deref() != Some("1") {
-        return Ok(false);
+/// The terminal host whose behavior a command takes on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Host {
+    Plain,
+    Herdr,
+    Orca,
+}
+
+/// The innermost host, so a herdr pane inside an Orca tab is herdr's; `Plain` when its
+/// key in `config.json` is `false`. herdr sets `HERDR_ENV=1` in its panes; Orca sets
+/// `TERM_PROGRAM=Orca`, and a session nemonik started inside Orca carries
+/// `ORCA_WORKTREE_ID` (its `TERM_PROGRAM` is tmux's). In other tmux sessions Orca's
+/// variables are the tmux server's, from whichever terminal started it, so they don't
+/// count. `config` is read only inside a host.
+fn host_from(
+    env: impl Fn(&str) -> Option<String>,
+    in_nemonik_session: impl FnOnce() -> bool,
+    config: impl FnOnce() -> Result<Config>,
+) -> Result<Host> {
+    if env("HERDR_ENV").as_deref() == Some("1") {
+        return Ok(match config()?.herdr {
+            Some(false) => Host::Plain,
+            _ => Host::Herdr,
+        });
     }
-    Ok(read_config_at(&config_path()?)?.herdr != Some(false))
+    let in_orca = env("TERM_PROGRAM").as_deref() == Some("Orca")
+        || (env("ORCA_WORKTREE_ID").is_some_and(|id| !id.is_empty()) && in_nemonik_session());
+    if in_orca {
+        return Ok(match config()?.orca {
+            Some(false) => Host::Plain,
+            _ => Host::Orca,
+        });
+    }
+    Ok(Host::Plain)
+}
+
+pub fn terminal_host() -> Result<Host> {
+    host_from(
+        |key| std::env::var(key).ok(),
+        crate::tmux::in_nemonik_session,
+        || read_config_at(&config_path()?),
+    )
 }
 
 // Trust policy: `--trust` > NEMONIK_TRUST > `config.json` > `strict`. Never read
@@ -251,12 +289,67 @@ mod tests {
     }
 
     #[test]
-    fn read_config_at_rejects_a_non_boolean_herdr_naming_the_file() {
+    fn read_config_at_rejects_a_non_boolean_herdr_or_orca_naming_the_file() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.json");
-        std::fs::write(&path, r#"{"herdr": "yes"}"#).unwrap();
-        let err = format!("{:#}", read_config_at(&path).unwrap_err());
-        assert!(err.contains("config.json"), "{err}");
+        for raw in [r#"{"herdr": "yes"}"#, r#"{"orca": "yes"}"#] {
+            std::fs::write(&path, raw).unwrap();
+            let err = format!("{:#}", read_config_at(&path).unwrap_err());
+            assert!(err.contains("config.json"), "{err}");
+        }
+    }
+
+    fn host_in(vars: &[(&str, &str)], config: Config, in_nemonik_session: bool) -> Host {
+        let env = |key: &str| {
+            vars.iter()
+                .find(|(k, _)| *k == key)
+                .map(|(_, v)| v.to_string())
+        };
+        host_from(env, || in_nemonik_session, || Ok(config)).unwrap()
+    }
+
+    #[test]
+    fn host_from_picks_the_innermost_host_unless_its_key_is_false() {
+        let off = |herdr, orca| Config {
+            herdr,
+            orca,
+            ..Config::default()
+        };
+        let herdr_in_orca = [("HERDR_ENV", "1"), ("TERM_PROGRAM", "Orca")];
+        assert_eq!(
+            host_in(&herdr_in_orca, Config::default(), true),
+            Host::Herdr
+        );
+        assert_eq!(
+            host_in(&herdr_in_orca, off(Some(false), None), true),
+            Host::Plain
+        );
+        assert_eq!(
+            host_in(&[("TERM_PROGRAM", "Orca")], Config::default(), true),
+            Host::Orca
+        );
+        assert_eq!(
+            host_in(&[("TERM_PROGRAM", "Orca")], off(None, Some(false)), true),
+            Host::Plain
+        );
+        // Inside a session started in Orca, `TERM_PROGRAM` is tmux's. In the user's own
+        // tmux, Orca's variables are the tmux server's, from whichever terminal started it.
+        let in_session = [("TERM_PROGRAM", "tmux"), ("ORCA_WORKTREE_ID", "r::/p")];
+        assert_eq!(host_in(&in_session, Config::default(), true), Host::Orca);
+        assert_eq!(host_in(&in_session, Config::default(), false), Host::Plain);
+        assert_eq!(
+            host_in(&[("TERM_PROGRAM", "iTerm.app")], Config::default(), true),
+            Host::Plain
+        );
+    }
+
+    #[test]
+    fn host_from_reads_no_config_outside_a_host() {
+        let unreadable = || anyhow::bail!("config read outside a host");
+        assert_eq!(
+            host_from(|_| None, || true, unreadable).unwrap(),
+            Host::Plain
+        );
     }
 
     #[test]
