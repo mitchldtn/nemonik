@@ -5,7 +5,7 @@ order: 4
 description: How nk run and nk attach behave in an Orca terminal, with agent status, sessions in terminals of the same worktree, Codex accounts and the off switch.
 ---
 
-[Orca](https://www.onorca.dev) is a desktop app for running coding agents in parallel worktrees. nemonik sessions still run in tmux. In an Orca terminal, `nk run` also tells Orca about them. Tested with Orca 1.4.255 on macOS, Claude Code 2.1.308 and Codex 0.164.0.
+[Orca](https://www.onorca.dev) is a desktop app for running coding agents in parallel worktrees. nemonik sessions still run in tmux. In an Orca terminal, `nk run` also tells Orca about them. Tested with Orca 1.4.255 on macOS, Claude Code 2.1.308 and Codex 0.167.0.
 
 ## In an Orca terminal
 
