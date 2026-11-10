@@ -156,10 +156,13 @@ pub enum Host {
 
 /// The innermost host, so a herdr pane inside an Orca tab is herdr's; `Plain` when its
 /// key in `config.json` is `false`. herdr sets `HERDR_ENV=1` in its panes; Orca sets
-/// `TERM_PROGRAM=Orca`, and a session started inside Orca carries `ORCA_WORKTREE_ID`
-/// (its `TERM_PROGRAM` is tmux's). `config` is read only inside a host.
+/// `TERM_PROGRAM=Orca`, and a session nemonik started inside Orca carries
+/// `ORCA_WORKTREE_ID` (its `TERM_PROGRAM` is tmux's). In other tmux sessions Orca's
+/// variables are the tmux server's, from whichever terminal started it, so they don't
+/// count. `config` is read only inside a host.
 fn host_from(
     env: impl Fn(&str) -> Option<String>,
+    in_nemonik_session: impl FnOnce() -> bool,
     config: impl FnOnce() -> Result<Config>,
 ) -> Result<Host> {
     if env("HERDR_ENV").as_deref() == Some("1") {
@@ -169,7 +172,7 @@ fn host_from(
         });
     }
     let in_orca = env("TERM_PROGRAM").as_deref() == Some("Orca")
-        || env("ORCA_WORKTREE_ID").is_some_and(|id| !id.is_empty());
+        || (env("ORCA_WORKTREE_ID").is_some_and(|id| !id.is_empty()) && in_nemonik_session());
     if in_orca {
         return Ok(match config()?.orca {
             Some(false) => Host::Plain,
@@ -182,6 +185,7 @@ fn host_from(
 pub fn terminal_host() -> Result<Host> {
     host_from(
         |key| std::env::var(key).ok(),
+        crate::tmux::in_nemonik_session,
         || read_config_at(&config_path()?),
     )
 }
@@ -295,13 +299,17 @@ mod tests {
         }
     }
 
-    fn host_with(vars: &[(&str, &str)], config: Config) -> Host {
+    fn host_in(vars: &[(&str, &str)], config: Config, in_nemonik_session: bool) -> Host {
         let env = |key: &str| {
             vars.iter()
                 .find(|(k, _)| *k == key)
                 .map(|(_, v)| v.to_string())
         };
-        host_from(env, || Ok(config)).unwrap()
+        host_from(env, || in_nemonik_session, || Ok(config)).unwrap()
+    }
+
+    fn host_with(vars: &[(&str, &str)], config: Config) -> Host {
+        host_in(vars, config, true)
     }
 
     #[test]
@@ -325,9 +333,11 @@ mod tests {
             host_with(&[("TERM_PROGRAM", "Orca")], off(None, Some(false))),
             Host::Plain
         );
-        // Inside a session started in Orca, `TERM_PROGRAM` is tmux's.
+        // Inside a session started in Orca, `TERM_PROGRAM` is tmux's. In the user's own
+        // tmux, Orca's variables are the tmux server's, from whichever terminal started it.
         let in_session = [("TERM_PROGRAM", "tmux"), ("ORCA_WORKTREE_ID", "r::/p")];
         assert_eq!(host_with(&in_session, Config::default()), Host::Orca);
+        assert_eq!(host_in(&in_session, Config::default(), false), Host::Plain);
         assert_eq!(
             host_with(&[("TERM_PROGRAM", "iTerm.app")], Config::default()),
             Host::Plain
@@ -337,7 +347,10 @@ mod tests {
     #[test]
     fn host_from_reads_no_config_outside_a_host() {
         let unreadable = || anyhow::bail!("config read outside a host");
-        assert_eq!(host_from(|_| None, unreadable).unwrap(), Host::Plain);
+        assert_eq!(
+            host_from(|_| None, || true, unreadable).unwrap(),
+            Host::Plain
+        );
     }
 
     #[test]

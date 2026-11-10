@@ -157,8 +157,7 @@ fn tmux_spawn_error(e: std::io::Error) -> anyhow::Error {
     }
 }
 
-/// The tmux user option that records which agent a session runs.
-const AGENT_OPTION: &str = "@nemonik-agent";
+use nemonik_core::tmux::AGENT_OPTION;
 
 /// Best-effort: without the record, a later attach inside herdr sets no agent hint.
 fn record_agent(session: &str, agent: &str) {

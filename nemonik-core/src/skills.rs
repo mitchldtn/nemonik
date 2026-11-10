@@ -38,6 +38,27 @@ pub fn codex_home_dir(session: &str) -> Result<PathBuf> {
     Ok(session_base(session)?.join("codex-home"))
 }
 
+/// The Codex home a session started from a shell with `CODEX_HOME=home` should use.
+/// A nemonik session home is removed when its session ends, so it passes on the home it
+/// was seeded from, where its `auth.json` link points; `None` (Codex's default) without
+/// that link.
+fn codex_home_to_pass_on(home: &Path, sessions: &Path) -> Option<PathBuf> {
+    let resolved = |p: &Path| std::fs::canonicalize(p).unwrap_or(p.to_path_buf());
+    if !resolved(home).starts_with(resolved(sessions)) {
+        return Some(home.to_path_buf());
+    }
+    let auth = std::fs::read_link(home.join("auth.json")).ok()?;
+    auth.parent().map(Path::to_path_buf)
+}
+
+/// The launching shell's `CODEX_HOME` to put in a session's spec, when it has one.
+pub fn launching_codex_home() -> Result<Option<PathBuf>> {
+    let Some(home) = std::env::var_os("CODEX_HOME") else {
+        return Ok(None);
+    };
+    Ok(codex_home_to_pass_on(Path::new(&home), &sessions_dir()?))
+}
+
 fn real_codex_home() -> Result<PathBuf> {
     if let Some(dir) = std::env::var_os("CODEX_HOME") {
         return Ok(PathBuf::from(dir));
@@ -377,6 +398,32 @@ mod tests {
         assert!(!dest.path().join("hooks.json").exists());
         assert!(!dest.path().join("skills/.system").exists());
         assert!(dest.path().join("skills").is_dir());
+    }
+
+    #[test]
+    fn codex_home_to_pass_on_is_the_origin_of_a_session_home() {
+        let real = TempDir::new().unwrap();
+        let sessions = TempDir::new().unwrap();
+        std::fs::write(real.path().join("auth.json"), "tok").unwrap();
+        let parent = sessions.path().join("parent/codex-home");
+        seed_codex_home(real.path(), &parent).unwrap();
+        let child = sessions.path().join("child/codex-home");
+        seed_codex_home(&parent, &child).unwrap();
+        let origin = std::fs::canonicalize(real.path()).unwrap();
+
+        for home in [&parent, &child] {
+            assert_eq!(
+                codex_home_to_pass_on(home, sessions.path()),
+                Some(origin.clone())
+            );
+        }
+        assert_eq!(
+            codex_home_to_pass_on(real.path(), sessions.path()),
+            Some(real.path().to_path_buf())
+        );
+        let keyring_login = sessions.path().join("k/codex-home");
+        std::fs::create_dir_all(&keyring_login).unwrap();
+        assert_eq!(codex_home_to_pass_on(&keyring_login, sessions.path()), None);
     }
 
     #[test]

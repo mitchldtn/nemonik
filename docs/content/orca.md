@@ -34,7 +34,7 @@ By default, Orca starts the agents it launches itself without permission prompts
 
 A session reports its status to the terminal it first showed in. `nk attach <session>` in another Orca terminal shows the session, but its status stays on the first terminal, or shows nowhere once that terminal is closed.
 
-A session started outside Orca, for example in iTerm2, shows no status in Orca, and its kits open with `--new` in a new window, using `new_window_command`.
+A session started outside Orca, for example in iTerm2, shows no status in Orca, and its kits open with `--new` in a new window, using `new_window_command`. So does `nk run` in a tmux session of your own inside Orca.
 
 ## Not covered
 

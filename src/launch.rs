@@ -526,8 +526,13 @@ pub async fn run(
     let (mut args, mut env) = finish_argv(&launch, &session)?;
     // The launching shell's Codex home (an Orca managed account sets it), unless the
     // session has its own.
-    if let Ok(home) = std::env::var("CODEX_HOME") {
-        env.entry("CODEX_HOME".to_string()).or_insert(home);
+    if let Some(home) = nemonik_core::skills::launching_codex_home()? {
+        // Fail closed on a non-UTF-8 path rather than point Codex at the wrong home.
+        let home = home.to_str().ok_or_else(|| {
+            anyhow::anyhow!("codex home path is not valid UTF-8: {}", home.display())
+        })?;
+        env.entry("CODEX_HOME".to_string())
+            .or_insert_with(|| home.to_string());
     }
     match host {
         Host::Herdr => {
