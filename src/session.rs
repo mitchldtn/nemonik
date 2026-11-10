@@ -388,7 +388,7 @@ pub fn launch(
     println!("Started detached session '{name}'.");
 
     if let Some(project) = remote_project {
-        crate::remote::spawn::daemon(project, name)?;
+        crate::remote::spawn::daemon(project, name).inspect_err(|_| close_terminal())?;
     }
 
     if host == Host::Herdr && (new || no_attach) {
