@@ -8,11 +8,15 @@ use std::process::{Command, Stdio};
 
 /// The variables that name one Orca terminal. Orca's status hooks report under
 /// `ORCA_PANE_KEY` alone, so a session carries the identity of the terminal showing it.
-const IDENTITY: [&str; 4] = [
+/// A terminal Orca's agent picker launched also has a launch token, which a new terminal
+/// doesn't.
+const IDENTITY: [&str; 6] = [
     "ORCA_PANE_KEY",
     "ORCA_AGENT_PANE",
     "ORCA_TAB_ID",
     "ORCA_TERMINAL_HANDLE",
+    "ORCA_AGENT_LAUNCH_TOKEN",
+    "ORCA_AGENT_LAUNCH",
 ];
 
 /// The launching pane's `ORCA_*` variables for a session's spec, with the pane identity
@@ -41,13 +45,17 @@ pub struct Terminal {
 }
 
 impl Terminal {
-    /// The identity a session shown in this terminal carries, in `IDENTITY`'s order.
+    /// The identity a session shown in this terminal carries; it has no launch token.
     pub fn identity(&self) -> BTreeMap<String, String> {
-        IDENTITY
-            .into_iter()
-            .zip([&self.pane_key, &self.pane_key, &self.tab_id, &self.handle])
-            .map(|(key, value)| (key.to_string(), value.clone()))
-            .collect()
+        [
+            ("ORCA_PANE_KEY", &self.pane_key),
+            ("ORCA_AGENT_PANE", &self.pane_key),
+            ("ORCA_TAB_ID", &self.tab_id),
+            ("ORCA_TERMINAL_HANDLE", &self.handle),
+        ]
+        .into_iter()
+        .map(|(key, value)| (key.to_string(), value.clone()))
+        .collect()
     }
 }
 
@@ -155,6 +163,7 @@ mod tests {
             ("ORCA_AGENT_PANE", "t1:l1"),
             ("ORCA_TAB_ID", "t1"),
             ("ORCA_TERMINAL_HANDLE", "term_1"),
+            ("ORCA_AGENT_LAUNCH_TOKEN", "launch_1"),
             ("ORCA_WORKTREE_ID", "r::/p"),
             ("ORCA_AGENT_HOOK_ENDPOINT", "/e.env"),
             ("TERM_PROGRAM", "Orca"),
@@ -167,7 +176,7 @@ mod tests {
     #[test]
     fn forwarded_env_keeps_the_pane_identity_only_for_an_attach_here() {
         let here = forwarded_env(pane_vars(), Attach::Here);
-        assert_eq!(here.len(), 6, "{here:?}");
+        assert_eq!(here.len(), 7, "{here:?}");
         assert!(!here.contains_key("TERM_PROGRAM"));
         let elsewhere = forwarded_env(pane_vars(), Attach::Elsewhere);
         assert_eq!(
@@ -185,6 +194,7 @@ mod tests {
         assert_eq!(identity["ORCA_AGENT_PANE"], "t9:l9");
         assert_eq!(identity["ORCA_TAB_ID"], "t9");
         assert_eq!(identity["ORCA_TERMINAL_HANDLE"], "term_9");
+        assert_eq!(identity.len(), 4);
         let refused =
             r#"{"id":"x","ok":false,"error":{"code":"worktree_not_found","message":"no"}}"#;
         assert_eq!(created_terminal(refused), None);

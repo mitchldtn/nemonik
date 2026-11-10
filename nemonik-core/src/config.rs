@@ -308,10 +308,6 @@ mod tests {
         host_from(env, || in_nemonik_session, || Ok(config)).unwrap()
     }
 
-    fn host_with(vars: &[(&str, &str)], config: Config) -> Host {
-        host_in(vars, config, true)
-    }
-
     #[test]
     fn host_from_picks_the_innermost_host_unless_its_key_is_false() {
         let off = |herdr, orca| Config {
@@ -320,26 +316,29 @@ mod tests {
             ..Config::default()
         };
         let herdr_in_orca = [("HERDR_ENV", "1"), ("TERM_PROGRAM", "Orca")];
-        assert_eq!(host_with(&herdr_in_orca, Config::default()), Host::Herdr);
         assert_eq!(
-            host_with(&herdr_in_orca, off(Some(false), None)),
+            host_in(&herdr_in_orca, Config::default(), true),
+            Host::Herdr
+        );
+        assert_eq!(
+            host_in(&herdr_in_orca, off(Some(false), None), true),
             Host::Plain
         );
         assert_eq!(
-            host_with(&[("TERM_PROGRAM", "Orca")], Config::default()),
+            host_in(&[("TERM_PROGRAM", "Orca")], Config::default(), true),
             Host::Orca
         );
         assert_eq!(
-            host_with(&[("TERM_PROGRAM", "Orca")], off(None, Some(false))),
+            host_in(&[("TERM_PROGRAM", "Orca")], off(None, Some(false)), true),
             Host::Plain
         );
         // Inside a session started in Orca, `TERM_PROGRAM` is tmux's. In the user's own
         // tmux, Orca's variables are the tmux server's, from whichever terminal started it.
         let in_session = [("TERM_PROGRAM", "tmux"), ("ORCA_WORKTREE_ID", "r::/p")];
-        assert_eq!(host_with(&in_session, Config::default()), Host::Orca);
+        assert_eq!(host_in(&in_session, Config::default(), true), Host::Orca);
         assert_eq!(host_in(&in_session, Config::default(), false), Host::Plain);
         assert_eq!(
-            host_with(&[("TERM_PROGRAM", "iTerm.app")], Config::default()),
+            host_in(&[("TERM_PROGRAM", "iTerm.app")], Config::default(), true),
             Host::Plain
         );
     }

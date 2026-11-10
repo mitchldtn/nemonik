@@ -303,7 +303,7 @@ mod tests {
         let real = TempDir::new().unwrap();
         let dest = TempDir::new().unwrap();
         std::fs::write(real.path().join("auth.json"), "tok").unwrap();
-        std::fs::write(real.path().join("config.toml"), "model = \"m\"\n").unwrap();
+        std::fs::write(real.path().join("config.toml"), "cfg").unwrap();
         std::fs::create_dir_all(real.path().join("skills/.system/imagegen")).unwrap();
 
         seed_codex_home(real.path(), dest.path()).unwrap();
@@ -314,7 +314,7 @@ mod tests {
         );
         assert_eq!(
             std::fs::read_to_string(dest.path().join("config.toml")).unwrap(),
-            "model = \"m\"\n"
+            "cfg"
         );
         assert!(dest.path().join("skills/.system/imagegen").exists());
         assert!(
@@ -345,7 +345,7 @@ mod tests {
         std::fs::write(real.path().join("auth.json"), "tok").unwrap();
         std::fs::create_dir_all(real.path().join("skills/.system/imagegen")).unwrap();
         seed_codex_home(real.path(), parent.path()).unwrap();
-        std::fs::write(parent.path().join("config.toml"), "model = \"parent\"\n").unwrap();
+        std::fs::write(parent.path().join("config.toml"), "parent-cfg").unwrap();
 
         seed_codex_home(parent.path(), child.path()).unwrap();
         for rel in ["auth.json", "skills/.system"] {
@@ -363,7 +363,7 @@ mod tests {
         assert!(child.path().join("skills/.system/imagegen").exists());
         assert_eq!(
             std::fs::read_to_string(child.path().join("config.toml")).unwrap(),
-            "model = \"parent\"\n"
+            "parent-cfg"
         );
     }
 
@@ -372,7 +372,7 @@ mod tests {
         let real = TempDir::new().unwrap();
         let dest = TempDir::new().unwrap();
         std::fs::write(real.path().join("auth.json"), "tok").unwrap();
-        std::fs::write(real.path().join("config.toml"), "model = \"m\"\n").unwrap();
+        std::fs::write(real.path().join("config.toml"), "cfg").unwrap();
         seed_codex_home(real.path(), dest.path()).unwrap();
         seed_codex_home(real.path(), dest.path()).unwrap();
         assert_eq!(
@@ -381,7 +381,7 @@ mod tests {
         );
         assert_eq!(
             std::fs::read_to_string(dest.path().join("config.toml")).unwrap(),
-            "model = \"m\"\n"
+            "cfg"
         );
     }
 
